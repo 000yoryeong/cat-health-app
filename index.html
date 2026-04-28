@@ -471,7 +471,12 @@ function renderHist() {
       const originalIndex = records.indexOf(r); const c=cats.find(x=>x.id===r.cat);
       const pb=r.poop==='정상'?'ok':(r.poop==='혈변'?'bad':(r.poop==='없음'?'':'warn'));
       const customRows=cfields.filter(cf=>r.custom&&r.custom[cf.id]!=null).map(cf=>`<div class="hrow"><span class="hk">${cf.name}</span><span class="hv">${r.custom[cf.id]} <span style="font-size:11px;color:var(--text3)">${cf.unit}</span></span></div>`).join('');
-      const photoHtml = r.photoIds ? r.photoIds.map(fid => { const cached = photoCache[fid]; return cached ? `<img class="photo-thumb" src="${cached}" onclick="openLightbox('${cached}')">` : `<div class="photo-thumb" onclick="viewDrivePhoto('${fid}')">📷<br>사진</div>`; }).join('') : '';
+      
+      // 💡 핵심 변경: 구글 드라이브 공개 링크를 사용하여 로그인 없이 사진 보기 지원
+      const photoHtml = r.photoIds ? r.photoIds.map(fid => { 
+        const publicUrl = `https://drive.google.com/uc?export=view&id=${fid}`;
+        return `<img class="photo-thumb" src="${publicUrl}" onclick="openLightbox('${publicUrl}')" onerror="this.style.display='none'">`; 
+      }).join('') : '';
 
       return `
       <div class="hist-item">
@@ -480,8 +485,8 @@ function renderHist() {
             <span class="hist-tag ${r.cat==='a'?'tga':'tgb'}">${c.emoji} ${c.name}</span>
           </div>
           <div style="display:flex; gap:6px;">
-            <button class="sec-hdr-btn" onclick="loadForEdit(${originalIndex})">수정</button>
-            <button class="sec-hdr-btn" style="color:var(--bad); background:var(--bad-bg); border-color:var(--bad);" onclick="deleteRecord(${originalIndex})">삭제</button>
+            ${shareMode ? '' : `<button class="sec-hdr-btn" onclick="loadForEdit(${originalIndex})">수정</button>
+            <button class="sec-hdr-btn" style="color:var(--bad); background:var(--bad-bg); border-color:var(--bad);" onclick="deleteRecord(${originalIndex})">삭제</button>`}
           </div>
         </div>
         ${r.weight?`<div class="hrow"><span class="hk">체중</span><span class="hv">${r.weight.toFixed(1)} kg</span></div>`:''}
@@ -630,18 +635,22 @@ async function updateCat(i, k, v) {
   showToast('프로필 저장 완료!', 0);
 }
 
-// ... (아래 genShareLink() 함수는 기존 그대로 유지) ...
+// 수정된 공유 링크 생성 함수 (사진 ID 포함)
 function genShareLink(){
-  const payload={cats, records:records.map(r=>({...r,photoIds:[]})), vets, cfields, generated:new Date().toISOString()};
-  try{ const b64=btoa(unescape(encodeURIComponent(JSON.stringify(payload)))); shareUrl=location.href.split('?')[0]+'?share='+encodeURIComponent(b64); const box=document.getElementById('share-link-box'); box.textContent=shareUrl; box.style.display='block'; document.getElementById('share-copy-btn').style.display=''; showToast('링크 생성 완료!',0); }catch(e){showToast('데이터가 너무 많아요.',0);}
+  // 💡 핵심 변경: records를 처리할 때 photoIds를 삭제하지 않고 그대로 포함시킴
+  const payload={cats, records, vets, cfields, generated:new Date().toISOString()};
+  try{ 
+    const b64=btoa(unescape(encodeURIComponent(JSON.stringify(payload)))); 
+    shareUrl=location.href.split('?')[0]+'?share='+encodeURIComponent(b64); 
+    const box=document.getElementById('share-link-box'); 
+    box.textContent=shareUrl; 
+    box.style.display='block'; 
+    document.getElementById('share-copy-btn').style.display=''; 
+    showToast('사진이 포함된 링크 생성 완료!',0); 
+  }catch(e){
+    showToast('데이터가 너무 많아요.',0);
+  }
 }
-function copyShareLink(){ navigator.clipboard.writeText(shareUrl).then(()=>showToast('링크 복사 완료!',0)).catch(()=>{ const ta=document.createElement('textarea'); ta.value=shareUrl; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); showToast('링크 복사 완료!',0); }); }
-
-function checkShareMode(){
-  const params=new URLSearchParams(location.search); const shareData=params.get('share'); if(!shareData) return;
-  try{ const payload=JSON.parse(decodeURIComponent(escape(atob(shareData)))); cats=payload.cats; records=payload.records; vets=payload.vets||[]; cfields=payload.cfields||[]; shareMode=true; const banner=document.createElement('div'); banner.className='share-view-banner'; banner.innerHTML=`읽기 전용 공유 보기 · ${new Date(payload.generated).toLocaleDateString('ko-KR')} 기준`; document.querySelector('.app').insertBefore(banner, document.querySelector('.app').firstChild); document.getElementById('tb-record').style.display='none'; document.getElementById('tb-settings').style.display='none'; }catch(e){}
-}
-
 /* ═══════════════════════════════════
    LIGHTBOX & TOAST
 ═══════════════════════════════════ */
@@ -699,8 +708,32 @@ async function gdriveEnsureFolder(name){
   if(d.files&&d.files.length) return d.files[0].id;
   const cr=await fetch('https://www.googleapis.com/drive/v3/files',{ method:'POST',headers:{Authorization:'Bearer '+accessToken,'Content-Type':'application/json'}, body:JSON.stringify({name,mimeType:'application/vnd.google-apps.folder'})}); const cd=await cr.json(); return cd.id||null;
 }
-async function gdriveFindFile(name,space='appDataFolder'){ const res=await fetch(`https://www.googleapis.com/drive/v3/files?spaces=${space}&q=name='${name}'&fields=files(id)`, {headers:{Authorization:'Bearer '+accessToken}}); const d=await res.json(); return d.files&&d.files.length?d.files[0].id:null; }
-async function gdriveDownloadJSON(fid){ try{ const res=await fetch(`https://www.googleapis.com/drive/v3/files/${fid}?alt=media`,{headers:{Authorization:'Bearer '+accessToken}}); return await res.json(); }catch(e){return null;} }
+
+// 1. 일반 드라이브에서 파일을 찾도록 수정 (space 속성 제거)
+async function gdriveFindFile(name) { 
+  const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${name}' and trashed=false&fields=files(id)`, {headers:{Authorization:'Bearer '+accessToken}}); 
+  const d = await res.json(); 
+  return d.files && d.files.length ? d.files[0].id : null; 
+}
+
+// 2. 백업 데이터를 숨김 폴더가 아닌 '내 드라이브' 최상단에 생성하도록 수정
+async function gdriveUploadJSON() {
+  const payload = JSON.stringify({cats, records, vets, cfields, savedAt:new Date().toISOString()}); 
+  const blob = new Blob([payload], {type:'application/json'});
+  
+  if (driveFileId) { 
+    await fetch(`https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=media`, {method:'PATCH', headers:{Authorization:'Bearer '+accessToken, 'Content-Type':'application/json'}, body:blob}); 
+  } else { 
+    const form = new FormData(); 
+    // parents:['appDataFolder'] 설정을 제거하여 일반 폴더에 파일이 생기도록 함
+    form.append('metadata', new Blob([JSON.stringify({name:BACKUP_FILE})], {type:'application/json'})); 
+    form.append('file', blob); 
+    const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {method:'POST', headers:{Authorization:'Bearer '+accessToken}, body:form}); 
+    const d = await res.json(); driveFileId = d.id; 
+  }
+}
+
+
 async function gdriveAutoUpload(){ if(!accessToken) return; try{await gdriveUploadJSON();}catch(e){} }
 
 /* ═══════════════════════════════════

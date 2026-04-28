@@ -584,13 +584,53 @@ async function deleteCField(id){ cfields=cfields.filter(cf=>cf.id!==id); saveLoc
    SETTINGS / SHARES
 ═══════════════════════════════════ */
 const EMOJIS=['🐱','🐈','🐈‍⬛','😸','😺','🙀','😻','🐾'];
+
 function renderSettings(){
   const cl=document.getElementById('cfield-list');
   cl.innerHTML=cfields.length?cfields.map(cf=>`<div class="cfield-item"><span class="cfield-name">${cf.name}</span><span class="cfield-unit-lbl">${cf.unit}</span><button class="cfield-del" onclick="deleteCField('${cf.id}')">×</button></div>`).join(''):'<div style="font-size:13px;color:var(--text3);padding:8px 0">추가된 항목이 없어요</div>';
-  document.getElementById('profile-cards').innerHTML=cats.map((c,i)=>`<div class="profile-card"><div class="profile-header"><span class="profile-avatar">${c.emoji}</span><div><div class="profile-name">${c.name||'이름 없음'}</div><div class="profile-sub">${c.breed||'품종 미입력'}${c.age?' · '+c.age:''}</div></div></div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">${EMOJIS.map(e=>`<span onclick="pickEmoji(${i},'${e}')" style="font-size:22px;cursor:pointer;padding:4px;border-radius:8px;${c.emoji===e?'background:var(--bg3)':''}">${e}</span>`).join('')}</div><div class="fg"><label class="fl">이름</label><input type="text" class="fi" value="${c.name}" placeholder="이름" oninput="updateCat(${i},'name',this.value)"></div><div class="fg"><label class="fl">품종</label><input type="text" class="fi" value="${c.breed}" placeholder="예: 코리안숏헤어" oninput="updateCat(${i},'breed',this.value)"></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="fg"><label class="fl">나이</label><input type="text" class="fi" value="${c.age}" placeholder="예: 3살" oninput="updateCat(${i},'age',this.value)"></div><div class="fg"><label class="fl">성별</label><input type="text" class="fi" value="${c.sex||''}" placeholder="수컷/암컷" oninput="updateCat(${i},'sex',this.value)"></div></div></div>`).join('');
+  
+  document.getElementById('profile-cards').innerHTML=cats.map((c,i)=>`
+    <div class="profile-card">
+      <div class="profile-header">
+        <span class="profile-avatar">${c.emoji}</span>
+        <div>
+          <div class="profile-name">${c.name||'이름 없음'}</div>
+          <div class="profile-sub">${c.breed||'품종 미입력'}${c.age?' · '+c.age:''}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+        ${EMOJIS.map(e=>`<span onclick="pickEmoji(${i},'${e}')" style="font-size:22px;cursor:pointer;padding:4px;border-radius:8px;${c.emoji===e?'background:var(--bg3)':''}">${e}</span>`).join('')}
+      </div>
+      <div class="fg"><label class="fl">이름</label><input type="text" class="fi" value="${c.name}" placeholder="이름" onchange="updateCat(${i},'name',this.value)"></div>
+      <div class="fg"><label class="fl">품종</label><input type="text" class="fi" value="${c.breed}" placeholder="예: 코리안숏헤어" onchange="updateCat(${i},'breed',this.value)"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="fg"><label class="fl">나이</label><input type="text" class="fi" value="${c.age}" placeholder="예: 3살" onchange="updateCat(${i},'age',this.value)"></div>
+        <div class="fg"><label class="fl">성별</label><input type="text" class="fi" value="${c.sex||''}" placeholder="수컷/암컷" onchange="updateCat(${i},'sex',this.value)"></div>
+      </div>
+    </div>`).join('');
 }
-function pickEmoji(i,e){cats[i].emoji=e;saveLocal();renderSettings();} function updateCat(i,k,v){cats[i][k]=v;saveLocal();}
 
+// 이모티콘을 고를 때 즉시 구글 드라이브에 저장하는 함수
+async function pickEmoji(i, e) {
+  cats[i].emoji = e;
+  saveLocal();
+  renderSettings();
+  renderHome();
+  await gdriveAutoUpload(); // 구글 드라이브 연동
+  showToast('이모티콘 저장 완료!', 0);
+}
+
+// 텍스트(이름, 나이 등)를 수정하고 칸을 벗어날 때 구글 드라이브에 저장하는 함수
+async function updateCat(i, k, v) {
+  cats[i][k] = v;
+  saveLocal();
+  renderSettings();
+  renderHome();
+  await gdriveAutoUpload(); // 구글 드라이브 연동
+  showToast('프로필 저장 완료!', 0);
+}
+
+// ... (아래 genShareLink() 함수는 기존 그대로 유지) ...
 function genShareLink(){
   const payload={cats, records:records.map(r=>({...r,photoIds:[]})), vets, cfields, generated:new Date().toISOString()};
   try{ const b64=btoa(unescape(encodeURIComponent(JSON.stringify(payload)))); shareUrl=location.href.split('?')[0]+'?share='+encodeURIComponent(b64); const box=document.getElementById('share-link-box'); box.textContent=shareUrl; box.style.display='block'; document.getElementById('share-copy-btn').style.display=''; showToast('링크 생성 완료!',0); }catch(e){showToast('데이터가 너무 많아요.',0);}

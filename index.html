@@ -761,12 +761,33 @@ window.onload = async () => {
     document.querySelector('.tab-bar').style.display = 'none'; // 의사선생님은 하단 메뉴 숨김
     
     try {
-      // 💡 핵심 수정: 브라우저 보안(CORS) 차단을 뚫기 위해 프록시(allorigins) 우회로 사용
-      const targetUrl = encodeURIComponent(`https://drive.google.com/uc?export=download&id=${liveId}`);
-      const res = await fetch(`https://api.allorigins.win/raw?url=${targetUrl}`);
-      
-      if(!res.ok) throw new Error('Cannot fetch');
-      const data = await res.json();
+      // 💡 핵심 수정: 구글의 봇 차단을 뚫기 위한 '다중 프록시(Multi-Proxy)' 연속 시도 로직
+      const targetUrl = `https://drive.google.com/uc?export=download&id=${liveId}`;
+      let data = null;
+
+      // 1순위 우회로: 현재 구글 드라이브와 가장 안정적으로 호환되는 corsproxy
+      try {
+        const res1 = await fetch(`https://corsproxy.io/?${encodeURIComponent(targetUrl)}`);
+        if (res1.ok) data = await res1.json();
+      } catch (err1) { console.log('1순위 우회로 차단됨, 2순위 시도'); }
+
+      // 2순위 우회로: 1순위가 막혔을 때 작동하는 백업 (codetabs)
+      if (!data) {
+        try {
+          const res2 = await fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`);
+          if (res2.ok) data = await res2.json();
+        } catch (err2) { console.log('2순위 우회로 차단됨, 3순위 시도'); }
+      }
+
+      // 3순위 우회로: 최후의 보루 (기존 allorigins)
+      if (!data) {
+        const res3 = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`);
+        if (res3.ok) data = await res3.json();
+      }
+
+      // 3개의 우회로가 모두 막혔을 경우 에러 처리
+      if (!data) throw new Error('모든 우회로 접속 실패');
+
       cats = data.cats; records = data.records; vets = data.vets || []; cfields = data.cfields || [];
       
       // 기록 모아보기를 메인 화면으로 설정
@@ -774,7 +795,7 @@ window.onload = async () => {
       document.getElementById('s-home').classList.remove('active');
       renderHist();
     } catch(e) {
-      alert('데이터를 불러오지 못했습니다. 주인이 구글 드라이브에서 파일 권한을 [링크가 있는 모든 사용자]로 열어두었는지 확인해주세요.');
+      alert('데이터를 불러오지 못했습니다. 일시적인 구글 드라이브 방화벽 차단일 수 있으니 잠시 후 새로고침 해주세요.');
     }
   } else {
     // 썸머님(주인) 모드

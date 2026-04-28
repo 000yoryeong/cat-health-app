@@ -651,6 +651,36 @@ function genShareLink(){
     showToast('데이터가 너무 많아요.',0);
   }
 }
+
+// 지워진 링크 복사 함수 복구
+function copyShareLink(){
+  navigator.clipboard.writeText(shareUrl).then(()=>showToast('링크 복사 완료!',0)).catch(()=>{
+    const ta=document.createElement('textarea');
+    ta.value=shareUrl; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    showToast('링크 복사 완료!',0);
+  });
+}
+
+// 지워진 공유 화면 모드 전환 함수 복구
+function checkShareMode(){
+  const params=new URLSearchParams(location.search);
+  const shareData=params.get('share');
+  if(!shareData) return;
+  try{
+    const payload=JSON.parse(decodeURIComponent(escape(atob(shareData))));
+    cats=payload.cats; records=payload.records; vets=payload.vets||[]; cfields=payload.cfields||[];
+    shareMode=true;
+    const banner=document.createElement('div');
+    banner.className='share-view-banner';
+    banner.innerHTML=`읽기 전용 공유 보기 · ${new Date(payload.generated).toLocaleDateString('ko-KR')} 기준`;
+    document.querySelector('.app').insertBefore(banner, document.querySelector('.app').firstChild);
+    document.getElementById('tb-record').style.display='none';
+    document.getElementById('tb-settings').style.display='none';
+  }catch(e){
+    console.error('공유 링크 데이터 오류:', e);
+  }
+}
 /* ═══════════════════════════════════
    LIGHTBOX & TOAST
 ═══════════════════════════════════ */

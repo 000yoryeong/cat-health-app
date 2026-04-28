@@ -761,12 +761,8 @@ window.onload = async () => {
     document.querySelector('.tab-bar').style.display = 'none';
     
     try {
-      // 💡 핵심 수정: 프록시(우회로)를 전부 버리고, 구글 공식 API 키를 사용해 직접 데이터를 뚫고 가져옵니다.
-      const API_KEY = 'AIzaSyB-bHmULBLnY8j7ialbu6y7k-rjVI0FnBg'; // <-- 반드시 이 부분을 수정해주세요!
-      
-      if (API_KEY === 'AIzaSyB-bHmULBLnY8j7ialbu6y7k-rjVI0FnBg') {
-        throw new Error('API 키가 입력되지 않았습니다.');
-      }
+      // 썸머님의 공식 API 키
+      const API_KEY = 'AIzaSyB-bHmULBLnY8j7ialbu6y7k-rjVI0FnBg';
 
       // 구글 공식 API 주소로 직접 요청 (CORS 에러나 봇 차단이 절대 발생하지 않음)
       const res = await fetch(`https://www.googleapis.com/drive/v3/files/${liveId}?alt=media&key=${API_KEY}`);

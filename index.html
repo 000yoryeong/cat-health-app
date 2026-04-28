@@ -285,7 +285,9 @@ textarea.fi{resize:none;line-height:1.6}
   <div id="profile-cards"></div>
 </div>
 
-</div><div class="tab-bar">
+</div>
+
+<div class="tab-bar">
   <button class="tbtn active" id="tb-home" onclick="switchTab('home')"><svg viewBox="0 0 24 24"><path d="M3 12L12 3l9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/></svg>홈</button>
   <button class="tbtn" id="tb-record" onclick="switchTab('record')"><svg viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>기록</button>
   <button class="tbtn" id="tb-history" onclick="switchTab('history')"><svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 000 4h6a2 2 0 000-4M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>히스토리</button>
@@ -490,4 +492,305 @@ function renderHist() {
     const itemsHtml = grouped[date].map(r => {
       const c=cats.find(x=>x.id===r.cat);
       const pb=r.poop==='정상'?'ok':(r.poop==='혈변'?'bad':(r.poop==='없음'?'':'warn'));
-      const customRows=cfields.filter(cf=>r.custom&&r.custom[cf.id]!=null).map(cf=>`<div class="hrow"><span class="hk">${cf.name}</span><span class="hv">${r.custom[cf.id]} <span style="font-size:11px;color:var(--text3)">
+      const customRows=cfields.filter(cf=>r.custom&&r.custom[cf.id]!=null).map(cf=>`<div class="hrow"><span class="hk">${cf.name}</span><span class="hv">${r.custom[cf.id]} <span style="font-size:11px;color:var(--text3)">${cf.unit}</span></span></div>`).join('');
+
+      // 💡 핵심 픽스: 라이브 모드에서는 썸네일 API를 적용하고, 차단 시 안전한 버튼으로 교체
+      const photoHtml = r.photoIds ? r.photoIds.map(fid => {
+        if (liveMode) {
+          const viewUrl = `https://drive.google.com/file/d/${fid}/view`;
+          const thumbUrl = `https://drive.google.com/thumbnail?id=${fid}&sz=w400`;
+          return `
+          <div style="display:inline-flex; align-items:center; justify-content:center; margin-right:8px; margin-top:4px;">
+            <a href="${viewUrl}" target="_blank" style="text-decoration:none; display:block;">
+              <img class="photo-thumb" src="${thumbUrl}" style="width:72px; height:72px; object-fit:cover; border-radius:10px; border:0.5px solid var(--border);" 
+                   onerror="this.outerHTML='<div class=\\'photo-thumb\\' style=\\'background:var(--bg3); display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--text2);\\'>📷<br>사진 열기</div>'">
+            </a>
+          </div>`;
+        } else {
+          const cached = photoCache[fid];
+          return cached 
+            ? `<img class="photo-thumb" src="${cached}" onclick="openLightbox('${cached}')">` 
+            : `<div class="photo-thumb" onclick="viewDrivePhoto('${fid}')">📷<br>사진 보기</div>`;
+        }
+      }).join('') : '';
+
+      return `
+      <div class="hist-item">
+        <div class="hist-header">
+          <span class="hist-tag ${r.cat==='a'?'tga':'tgb'}">${c.emoji} ${c.name}</span>
+          <div style="display:flex; gap:6px;">
+            ${liveMode ? '' : `<button class="sec-hdr-btn" onclick="loadForEdit(${records.indexOf(r)})">수정</button>
+            <button class="sec-hdr-btn" style="color:var(--bad); background:var(--bad-bg); border-color:var(--bad);" onclick="deleteRecord(${records.indexOf(r)})">삭제</button>`}
+          </div>
+        </div>
+        ${r.weight?`<div class="hrow"><span class="hk">체중</span><span class="hv">${r.weight.toFixed(1)} kg</span></div>`:''}
+        <div class="hrow"><span class="hk">식사</span><span class="hv">${r.meal}</span></div>
+        <div class="hrow"><span class="hk">배변</span><span class="hv"><span class="pbadge ${pb}">${r.poop}</span></span></div>
+        <div class="hrow"><span class="hk">컨디션</span><span class="hv">${r.cond}</span></div>
+        <div class="hrow"><span class="hk">음수</span><span class="hv">${r.water}</span></div>
+        ${customRows}
+        <div class="photo-row">${photoHtml}</div>
+        ${r.memo?`<div class="memo-box">${r.memo}</div>`:''}
+      </div>`;
+    }).join('');
+    return `<div class="date-group"><div class="date-group-header">📅 ${date}</div>${itemsHtml}</div>`;
+  }).join('');
+}
+
+const photoCache={};
+async function viewDrivePhoto(fid){
+  if(!accessToken){showToast('드라이브 연동을 먼저 해주세요.',0);return;}
+  showToast('사진을 불러오는 중...', 0);
+  try{
+    const res=await fetch(`https://www.googleapis.com/drive/v3/files/${fid}?alt=media`,{headers:{Authorization:'Bearer '+accessToken}});
+    const blob=await res.blob(); const url=URL.createObjectURL(blob); photoCache[fid]=url;
+    renderHist(); openLightbox(url); 
+  }catch(e){showToast('사진 로드 실패',0);}
+}
+
+/* ═══════════════════════════════════
+   VET
+═══════════════════════════════════ */
+function setVetFilter(f){vetFilter=f;renderVet();}
+function openVetPanel(){
+  openPanel('vet-panel'); document.getElementById('v-date').value=new Date().toISOString().split('T')[0];
+  const chips=document.querySelectorAll('#vg-cat .chip'); chips[0].textContent=cats[0].name;chips[0].dataset.g='vcat'; chips[1].textContent=cats[1].name;chips[1].dataset.g='vcat'; chips[0].classList.add('sa');chips[1].classList.remove('sa','sb');
+  pendingVetPhotos = []; document.getElementById('vet-photo-preview-list').innerHTML = '';
+}
+async function saveVet(){
+  const catName=getSel('vcat'); const cat=cats.find(c=>c.name===catName); if(!cat){showToast('고양이를 선택해주세요',0);return;}
+  const title=document.getElementById('v-title').value.trim(); if(!title){showToast('항목명을 입력해주세요',0);return;}
+  const vPhotoIds = []; for(const p of pendingVetPhotos){ const fid = await gdriveUploadPhoto(p.dataUrl, p.filename); if(fid) vPhotoIds.push(fid); }
+  vets.unshift({cat:cat.id,title,place:document.getElementById('v-place').value.trim(), date:document.getElementById('v-date').value,next:document.getElementById('v-next').value||null, note:document.getElementById('v-note').value.trim(),type:getSel('vtype'), vPhotoIds});
+  vets.sort((a,b)=>(b.date||'').localeCompare(a.date||'')); saveLocal(); await gdriveAutoUpload(); closePanel('vet-panel');
+  ['v-title','v-place','v-note'].forEach(id=>document.getElementById(id).value=''); document.getElementById('v-next').value=''; pendingVetPhotos=[];
+  showToast('저장 완료!', cat.id==='a'?0:1); renderVet();
+}
+async function deleteVet(idx) { if (!confirm('이 기록을 삭제할까요?')) return; vets.splice(idx, 1); saveLocal(); renderVet(); await gdriveAutoUpload(); showToast('삭제 완료', 0); }
+function renderVet(){
+  document.getElementById('vet-filters').innerHTML=`<div class="fchip ${vetFilter==='all'?'fall':''}" onclick="setVetFilter('all')">전체</div><div class="fchip ${vetFilter==='a'?'fa':''}" onclick="setVetFilter('a')">${cats[0].emoji} ${cats[0].name}</div><div class="fchip ${vetFilter==='b'?'fb':''}" onclick="setVetFilter('b')">${cats[1].emoji} ${cats[1].name}</div>`;
+  const filtered=vetFilter==='all'?vets:vets.filter(v=>v.cat===vetFilter);
+  const list=document.getElementById('vet-list');
+  if (liveMode) { if(document.getElementById('add-vet-wrap')) document.getElementById('add-vet-wrap').style.display = 'none'; }
+  if(!filtered.length){list.innerHTML='<div class="empty-state"><div class="empty-icon">🏥</div>병원 기록이 없어요</div>';return;}
+  
+  list.innerHTML=filtered.map(v=>{
+    const originalIndex = vets.indexOf(v); const c=cats.find(x=>x.id===v.cat); let badge='';
+    if(v.next){const d=Math.max(0,Math.round((new Date(v.next)-Date.now())/86400000));badge=`<span class="vet-badge ${v.cat==='a'?'vba':'vbb'}">다음: ${v.next} · D-${d}</span>`;} else if(v.date){badge=`<span class="vet-badge vbp">방문: ${v.date}</span>`;}
+    
+    const photoHtml = v.vPhotoIds ? v.vPhotoIds.map(fid => {
+      if (liveMode) {
+        const viewUrl = `https://drive.google.com/file/d/${fid}/view`;
+        const thumbUrl = `https://drive.google.com/thumbnail?id=${fid}&sz=w400`;
+        return `
+        <div style="display:inline-flex; align-items:center; justify-content:center; margin-right:8px; margin-top:8px;">
+          <a href="${viewUrl}" target="_blank" style="text-decoration:none; display:block;">
+            <img class="photo-thumb" src="${thumbUrl}" style="width:72px; height:72px; object-fit:cover; border-radius:10px; border:0.5px solid var(--border);" 
+                 onerror="this.outerHTML='<div class=\\'photo-thumb\\' style=\\'background:var(--bg3); display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--text2);\\'>📷<br>사진 열기</div>'">
+          </a>
+        </div>`;
+      } else {
+        const cached = photoCache[fid];
+        return cached 
+          ? `<img class="photo-thumb" src="${cached}" onclick="openLightbox('${cached}')">` 
+          : `<div class="photo-thumb" onclick="viewDrivePhoto('${fid}')">📷<br>사진 보기</div>`;
+      }
+    }).join('') : '';
+
+    return `<div class="vet-item">
+      <div class="vet-header">
+        <div><div class="vet-name">${v.title}</div><div class="vet-who">${c.emoji} ${c.name}</div>${v.place?`<div class="vet-place">${v.place}</div>`:''}${v.note?`<div class="vet-place" style="margin-top:3px">${v.note}</div>`:''}</div>
+        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
+          ${v.type?`<span style="font-size:11px;color:var(--text3);background:var(--bg3);padding:3px 8px;border-radius:10px">${v.type}</span>`:''}
+          ${liveMode ? '' : `<button class="sec-hdr-btn" style="color:var(--bad); background:var(--bad-bg); border-color:var(--bad);" onclick="deleteVet(${originalIndex})">삭제</button>`}
+        </div>
+      </div>${badge}
+      <div>${photoHtml}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ═══════════════════════════════════
+   CUSTOM FIELDS
+═══════════════════════════════════ */
+async function saveCField(){
+  const name=document.getElementById('cf-name').value.trim(); if(!name){showToast('이름을 입력해주세요',0);return;}
+  const uniqueId = 'cf_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+  cfields.push({id: uniqueId, name, unit:document.getElementById('cf-unit').value.trim()}); saveLocal();
+  document.getElementById('cf-name').value=''; document.getElementById('cf-unit').value=''; closePanel('cfield-panel'); renderSettings(); renderRecForm(); await gdriveAutoUpload(); showToast('항목 추가 완료!',0);
+}
+async function deleteCField(id){ cfields=cfields.filter(cf=>cf.id!==id); saveLocal(); renderSettings(); renderRecForm(); renderHome(); await gdriveAutoUpload(); showToast('삭제되었습니다.', 0); }
+
+/* ═══════════════════════════════════
+   SETTINGS
+═══════════════════════════════════ */
+const EMOJIS=['🐱','🐈','🐈‍⬛','😸','😺','🙀','😻','🐾'];
+
+function renderSettings(){
+  const cl=document.getElementById('cfield-list');
+  cl.innerHTML=cfields.length?cfields.map(cf=>`<div class="cfield-item"><span class="cfield-name">${cf.name}</span><span class="cfield-unit-lbl">${cf.unit}</span><button class="cfield-del" onclick="deleteCField('${cf.id}')">×</button></div>`).join(''):'<div style="font-size:13px;color:var(--text3);padding:8px 0">추가된 항목이 없어요</div>';
+  
+  document.getElementById('profile-cards').innerHTML=cats.map((c,i)=>`
+    <div class="profile-card">
+      <div class="profile-header">
+        <span class="profile-avatar">${c.emoji}</span>
+        <div>
+          <div class="profile-name">${c.name||'이름 없음'}</div>
+          <div class="profile-sub">${c.breed||'품종 미입력'}${c.age?' · '+c.age:''}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+        ${EMOJIS.map(e=>`<span onclick="pickEmoji(${i},'${e}')" style="font-size:22px;cursor:pointer;padding:4px;border-radius:8px;${c.emoji===e?'background:var(--bg3)':''}">${e}</span>`).join('')}
+      </div>
+      <div class="fg"><label class="fl">이름</label><input type="text" class="fi" value="${c.name}" placeholder="이름" onchange="updateCat(${i},'name',this.value)"></div>
+      <div class="fg"><label class="fl">품종</label><input type="text" class="fi" value="${c.breed}" placeholder="예: 코리안숏헤어" onchange="updateCat(${i},'breed',this.value)"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="fg"><label class="fl">나이</label><input type="text" class="fi" value="${c.age}" placeholder="예: 3살" onchange="updateCat(${i},'age',this.value)"></div>
+        <div class="fg"><label class="fl">성별</label><input type="text" class="fi" value="${c.sex||''}" placeholder="수컷/암컷" onchange="updateCat(${i},'sex',this.value)"></div>
+      </div>
+    </div>`).join('');
+}
+async function pickEmoji(i, e) { cats[i].emoji = e; saveLocal(); renderSettings(); renderHome(); await gdriveAutoUpload(); showToast('이모티콘 저장 완료!', 0); }
+async function updateCat(i, k, v) { cats[i][k] = v; saveLocal(); renderSettings(); renderHome(); await gdriveAutoUpload(); showToast('프로필 저장 완료!', 0); }
+
+/* ═══════════════════════════════════
+   LIVE LINK
+═══════════════════════════════════ */
+function genLiveLink(){
+  if(!driveFileId) { showToast('먼저 [구글 드라이브 동기화]를 완료해주세요.', 0); return; }
+  const liveUrl = location.href.split('?')[0] + '?live=' + driveFileId;
+  const box = document.getElementById('share-link-box'); 
+  box.textContent = liveUrl; box.style.display = 'block'; 
+  document.getElementById('share-copy-btn').style.display = ''; 
+  showToast('라이브 링크 생성 완료!', 0); 
+}
+function copyShareLink(){
+  const shareUrl = document.getElementById('share-link-box').textContent;
+  navigator.clipboard.writeText(shareUrl).then(()=>showToast('링크 복사 완료!',0)).catch(()=>{
+    const ta=document.createElement('textarea'); ta.value=shareUrl; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); showToast('링크 복사 완료!',0);
+  });
+}
+
+/* ═══════════════════════════════════
+   GOOGLE DRIVE
+═══════════════════════════════════ */
+const CLIENT_ID='44150749430-5pn0dir51re50r81malhtqcdtkrgfpoq.apps.googleusercontent.com';
+let tokenClient=null, accessToken=null, driveFileId=LS.get('driveFileId')||null;
+
+function initGDrive(){
+  if(!window.google?.accounts) return;
+  tokenClient=google.accounts.oauth2.initTokenClient({ client_id:CLIENT_ID, scope:'https://www.googleapis.com/auth/drive.file', callback:async resp=>{ if(resp.error){gdriveSetState('error');return;} accessToken=resp.access_token; sessionStorage.setItem('gd_token',accessToken); gdriveSetState('syncing'); await gdriveSyncFull(); } });
+  const saved=sessionStorage.getItem('gd_token'); if(saved){accessToken=saved;gdriveSetState('connected');}
+}
+function gdriveSetState(s){
+  const btn=document.getElementById('gdrive-btn'); const st=document.getElementById('gdrive-status'); if(!btn) return;
+  const map={ idle:{t:'구글 드라이브 연동',sub:'로그인 후 자동 백업',cls:'gdi',dis:false}, loading:{t:'연결 중…',sub:'',cls:'gdi',dis:true}, syncing:{t:'동기화 중…',sub:'',cls:'gdi',dis:true}, connected:{t:'드라이브에 저장됨',sub:'연결됨 ✓',cls:'gdo',dis:false}, error:{t:'다시 시도',sub:'오류 발생',cls:'gde',dis:false} };
+  const m=map[s]||map.idle; btn.textContent=m.t; btn.disabled=m.dis; btn.className='gdrive-btn '+m.cls; if(st) st.textContent=m.sub;
+}
+async function gdriveSync(){ if(!tokenClient){showToast('구글 로그인 로딩 중입니다...',0);return;} if(accessToken){gdriveSetState('syncing');await gdriveSyncFull();} else{gdriveSetState('loading');tokenClient.requestAccessToken({prompt:'consent'});} }
+async function gdriveSyncFull(){
+  driveFileId=await gdriveFindFile('냥이건강수첩_backup.json');
+  LS.set('driveFileId', driveFileId); 
+  if(driveFileId){ const remote=await gdriveDownloadJSON(driveFileId); if(remote) mergeAndApply(remote); }
+  await gdriveUploadJSON(); gdriveSetState('connected'); showToast('드라이브 동기화 완료!',0); saveLocal(); renderHome(); renderVet();
+}
+function mergeAndApply(remote){
+  const mRec=[...remote.records]; records.forEach(lr=>{if(!mRec.find(r=>r.cat===lr.cat&&r.date===lr.date))mRec.push(lr);}); mRec.sort((a,b)=>b.date.localeCompare(a.date));
+  const mVet=[...remote.vets]; vets.forEach(lv=>{if(!mVet.find(v=>v.cat===lv.cat&&v.date===lv.date&&v.title===lv.title))mVet.push(lv);});
+  cats=remote.cats; records=mRec; vets=mVet; if(remote.cfields) cfields=remote.cfields;
+}
+async function gdriveUploadJSON(){
+  const payload=JSON.stringify({cats,records,vets,cfields,savedAt:new Date().toISOString()}); const blob=new Blob([payload],{type:'application/json'});
+  if(driveFileId){ await fetch(`https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=media`, {method:'PATCH',headers:{Authorization:'Bearer '+accessToken,'Content-Type':'application/json'},body:blob}); } 
+  else { const form=new FormData(); form.append('metadata',new Blob([JSON.stringify({name:'냥이건강수첩_backup.json'})],{type:'application/json'})); form.append('file',blob); const res=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {method:'POST',headers:{Authorization:'Bearer '+accessToken},body:form}); const d=await res.json(); driveFileId=d.id; LS.set('driveFileId', driveFileId); }
+}
+async function gdriveUploadPhoto(dataUrl, filename){
+  if(!accessToken) return null;
+  try{
+    let folderId = await gdriveFindFile('냥이건강_사진');
+    if(!folderId) {
+      const cr=await fetch('https://www.googleapis.com/drive/v3/files',{ method:'POST',headers:{Authorization:'Bearer '+accessToken,'Content-Type':'application/json'}, body:JSON.stringify({name:'냥이건강_사진',mimeType:'application/vnd.google-apps.folder'})}); folderId = (await cr.json()).id;
+    }
+    const res=await fetch(dataUrl); const blob=await res.blob(); const form=new FormData();
+    form.append('metadata',new Blob([JSON.stringify({name:filename,parents:[folderId]})],{type:'application/json'})); form.append('file',new File([blob],filename,{type:'image/jpeg'}));
+    const r=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {method:'POST',headers:{Authorization:'Bearer '+accessToken},body:form}); return (await r.json()).id||null;
+  }catch(e){return null;}
+}
+async function gdriveFindFile(name) { 
+  const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${name}' and trashed=false&fields=files(id)`, {headers:{Authorization:'Bearer '+accessToken}}); 
+  const d = await res.json(); return d.files && d.files.length ? d.files[0].id : null; 
+}
+async function gdriveDownloadJSON(fid){ try{ const res=await fetch(`https://www.googleapis.com/drive/v3/files/${fid}?alt=media`,{headers:{Authorization:'Bearer '+accessToken}}); return await res.json(); }catch(e){return null;} }
+async function gdriveAutoUpload(){ if(!accessToken) return; try{await gdriveUploadJSON();}catch(e){} }
+
+/* ═══════════════════════════════════
+   APP INIT & PC/MOBILE UX
+═══════════════════════════════════ */
+window.onload = async () => {
+  const params = new URLSearchParams(location.search);
+  const liveId = params.get('live');
+  
+  if (liveId) {
+    liveMode = true;
+    
+    // 상단 배너
+    const banner = document.createElement('div');
+    banner.className = 'share-view-banner';
+    banner.innerHTML = `🩺 의사 선생님 실시간 라이브 보기 모드`;
+    document.querySelector('.app').insertBefore(banner, document.querySelector('.app').firstChild);
+    
+    // 기록/설정 탭 숨김
+    if(document.getElementById('tb-record')) document.getElementById('tb-record').style.display = 'none';
+    if(document.getElementById('tb-settings')) document.getElementById('tb-settings').style.display = 'none';
+
+    // 💡 PC 빈 화면 방지: 원본 홈 화면 내용을 잠시 보관하고 로딩 화면 띄우기
+    const sHome = document.getElementById('s-home');
+    const originalHomeHtml = sHome.innerHTML; 
+    sHome.innerHTML = `
+      <div style="padding:100px 20px; text-align:center; color:var(--text3);">
+        <div style="font-size:40px; margin-bottom:16px; animation:spin 1s linear infinite;">⏳</div>
+        <p style="line-height:1.6;">최신 진료 데이터를<br>동기화 중입니다...</p>
+      </div>
+    `;
+    const style = document.createElement('style');
+    style.innerHTML = `@keyframes spin { 100% { transform: rotate(360deg); } }`;
+    document.head.appendChild(style);
+
+    try {
+      const API_KEY = 'AIzaSyB-bHmULBLnY8j7ialbu6y7k-rjVI0FnBg';
+      const res = await fetch(`https://www.googleapis.com/drive/v3/files/${liveId}?alt=media&key=${API_KEY}`);
+      if (!res.ok) throw new Error('접근 실패');
+      const data = await res.json();
+      cats = data.cats; records = data.records; vets = data.vets || []; cfields = data.cfields || [];
+      
+      // 로딩 완료: 원본 홈 화면 복구 후 렌더링
+      sHome.innerHTML = originalHomeHtml;
+      switchTab('home');
+
+    } catch(e) {
+      // 로딩 실패: 에러 안내 화면 표시 (빈 까만화면 방지)
+      sHome.innerHTML = `
+        <div style="padding:60px 20px; text-align:center; color:var(--text3);">
+          <div style="font-size:50px; margin-bottom:16px;">🚧</div>
+          <h3 style="color:var(--bad); margin-bottom:12px; font-weight:500;">데이터 접속 지연</h3>
+          <p style="font-size:13px; line-height:1.6; color:var(--text2);">
+            일시적인 네트워크 문제이거나 주인이 파일 접근 권한을 열지 않았습니다.<br>새로고침을 눌러주세요.
+          </p>
+        </div>
+      `;
+    }
+  } else {
+    // 썸머님 모드
+    renderHome();
+  }
+};
+
+/* 나머지 유틸 함수 */
+function openLightbox(src){document.getElementById('lb-img').src=src;document.getElementById('lightbox').classList.add('open');}
+function closeLightbox(){document.getElementById('lightbox').classList.remove('open');}
+function showToast(m,c){const t=document.getElementById('toast');t.textContent=m;t.className='toast show';setTimeout(()=>t.classList.remove('show'),2000);}
+function gdriveSync() { location.reload(); }
+</script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+</body>
+</html>

@@ -745,55 +745,49 @@ async function gdriveDownloadJSON(fid){ try{ const res=await fetch(`https://www.
 async function gdriveAutoUpload(){ if(!accessToken) return; try{await gdriveUploadJSON();}catch(e){} }
 
 /* ═══════════════════════════════════
-   APP INIT & LIVE MODE LOGIC
+   APP INIT & LIVE MODE LOGIC (공식 API KEY 버전)
 ═══════════════════════════════════ */
 window.onload = async () => {
   const params = new URLSearchParams(location.search);
   const liveId = params.get('live');
   
   if (liveId) {
-    liveMode = true; // 라이브 모드 활성화 (수정/삭제 차단, 공개 사진 뷰어 모드)
+    liveMode = true;
     
     const banner = document.createElement('div');
     banner.className = 'share-view-banner';
     banner.innerHTML = `🩺 의사 선생님 실시간 라이브 보기 모드`;
     document.querySelector('.app').insertBefore(banner, document.querySelector('.app').firstChild);
-    document.querySelector('.tab-bar').style.display = 'none'; // 의사선생님은 하단 메뉴 숨김
+    document.querySelector('.tab-bar').style.display = 'none';
     
     try {
-      // 💡 핵심 수정: 구글의 리다이렉트(주소 이동) 추적을 완벽하게 지원하는 패키징 방식 사용
-      const targetUrl = `https://drive.google.com/uc?export=download&id=${liveId}`;
-      let data = null;
-
-      // allorigins 서버가 구글 파일을 읽은 뒤, 안전한 JSON 상자에 담아서(contents) 보내줌
-      const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`);
+      // 💡 핵심 수정: 프록시(우회로)를 전부 버리고, 구글 공식 API 키를 사용해 직접 데이터를 뚫고 가져옵니다.
+      const API_KEY = 'AIzaSyB-bHmULBLnY8j7ialbu6y7k-rjVI0FnBg'; // <-- 반드시 이 부분을 수정해주세요!
       
-      if (res.ok) {
-        const proxyJson = await res.json();
-        // 포장된 상자 안에 내용물이 있다면 진짜 데이터로 변환
-        if (proxyJson.contents) {
-          data = JSON.parse(proxyJson.contents);
-        }
+      if (API_KEY === 'AIzaSyB-bHmULBLnY8j7ialbu6y7k-rjVI0FnBg') {
+        throw new Error('API 키가 입력되지 않았습니다.');
       }
 
-      if (!data) throw new Error('구글 드라이브 접근 또는 파싱 실패');
-
+      // 구글 공식 API 주소로 직접 요청 (CORS 에러나 봇 차단이 절대 발생하지 않음)
+      const res = await fetch(`https://www.googleapis.com/drive/v3/files/${liveId}?alt=media&key=${API_KEY}`);
+      
+      if (!res.ok) throw new Error('구글 드라이브 데이터 접근 실패');
+      
+      const data = await res.json();
       cats = data.cats; records = data.records; vets = data.vets || []; cfields = data.cfields || [];
       
-      // 기록 모아보기를 메인 화면으로 설정
       document.getElementById('s-history').classList.add('active');
       document.getElementById('s-home').classList.remove('active');
       renderHist();
 
     } catch(e) {
-      // 💡 UI 개선: 데이터 로딩 실패 시 뼈대만 남지 않도록 에러 전용 화면을 예쁘게 그려줌
+      // 에러 발생 시 안내 화면
       document.getElementById('s-home').innerHTML = `
         <div style="padding:60px 20px; text-align:center; color:var(--text3);">
           <div style="font-size:50px; margin-bottom:16px;">🚧</div>
           <h3 style="color:var(--bad); margin-bottom:12px; font-weight:500;">데이터를 불러올 수 없습니다</h3>
           <p style="font-size:13px; line-height:1.6; color:var(--text2);">
-            구글 드라이브 보안 정책으로 인해 일시적으로 접속이 지연되었거나 차단되었습니다.<br><br>
-            잠시 후 화면을 새로고침 하시거나, 주인이 구글 드라이브에서 '냥이건강수첩_backup.json' 파일의 권한을 [링크가 있는 모든 사용자]로 열어두었는지 확인해 주세요.
+            API 키가 잘못되었거나, 주인이 구글 드라이브에서 '냥이건강수첩_backup.json' 파일의 권한을 [링크가 있는 모든 사용자]로 열어두지 않았습니다.
           </p>
         </div>
       `;

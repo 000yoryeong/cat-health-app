@@ -745,7 +745,7 @@ async function gdriveDownloadJSON(fid){ try{ const res=await fetch(`https://www.
 async function gdriveAutoUpload(){ if(!accessToken) return; try{await gdriveUploadJSON();}catch(e){} }
 
 /* ═══════════════════════════════════
-   APP INIT & LIVE MODE LOGIC (공식 API KEY 버전)
+   APP INIT & LIVE MODE LOGIC (로딩 애니메이션 적용)
 ═══════════════════════════════════ */
 window.onload = async () => {
   const params = new URLSearchParams(location.search);
@@ -760,11 +760,23 @@ window.onload = async () => {
     document.querySelector('.app').insertBefore(banner, document.querySelector('.app').firstChild);
     document.querySelector('.tab-bar').style.display = 'none';
     
+    // 💡 UX 개선: 데이터를 불러오는 동안 뼈대 화면 대신 '로딩 중' 메시지를 띄워줍니다.
+    const sHome = document.getElementById('s-home');
+    sHome.innerHTML = `
+      <div style="padding:100px 20px; text-align:center; color:var(--text3);">
+        <div style="font-size:40px; margin-bottom:16px; animation:spin 1s linear infinite;">⏳</div>
+        <p style="line-height:1.6;">구글 드라이브에서 최신 데이터를<br>불러오는 중입니다...</p>
+      </div>
+    `;
+    const style = document.createElement('style');
+    style.innerHTML = `@keyframes spin { 100% { transform: rotate(360deg); } }`;
+    document.head.appendChild(style);
+    
     try {
-      // 썸머님의 공식 API 키
+      // 썸머님의 완벽한 공식 API 키
       const API_KEY = 'AIzaSyB-bHmULBLnY8j7ialbu6y7k-rjVI0FnBg';
 
-      // 구글 공식 API 주소로 직접 요청 (CORS 에러나 봇 차단이 절대 발생하지 않음)
+      // 구글 공식 API 주소로 직접 요청
       const res = await fetch(`https://www.googleapis.com/drive/v3/files/${liveId}?alt=media&key=${API_KEY}`);
       
       if (!res.ok) throw new Error('구글 드라이브 데이터 접근 실패');
@@ -773,17 +785,17 @@ window.onload = async () => {
       cats = data.cats; records = data.records; vets = data.vets || []; cfields = data.cfields || [];
       
       document.getElementById('s-history').classList.add('active');
-      document.getElementById('s-home').classList.remove('active');
+      sHome.classList.remove('active'); // 로딩 화면 숨기기
       renderHist();
 
     } catch(e) {
-      // 에러 발생 시 안내 화면
-      document.getElementById('s-home').innerHTML = `
+      // 에러 발생 시 안내 화면으로 전환
+      sHome.innerHTML = `
         <div style="padding:60px 20px; text-align:center; color:var(--text3);">
           <div style="font-size:50px; margin-bottom:16px;">🚧</div>
           <h3 style="color:var(--bad); margin-bottom:12px; font-weight:500;">데이터를 불러올 수 없습니다</h3>
           <p style="font-size:13px; line-height:1.6; color:var(--text2);">
-            API 키가 잘못되었거나, 주인이 구글 드라이브에서 '냥이건강수첩_backup.json' 파일의 권한을 [링크가 있는 모든 사용자]로 열어두지 않았습니다.
+            API 키에 오류가 있거나, 주인이 구글 드라이브에서 '냥이건강수첩_backup.json' 파일의 권한을 [링크가 있는 모든 사용자]로 열어두지 않았습니다.
           </p>
         </div>
       `;

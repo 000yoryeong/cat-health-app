@@ -69,4 +69,425 @@ textarea.fi{resize:none;line-height:1.6}
 .chip:active{transform:scale(.96)}
 .chip.sa{background:var(--a-s);color:var(--a);border-color:var(--a)}
 .chip.sb{background:var(--b-s);color:var(--b);border-color:var(--b)}
-.save-btn{width:100%;padding:15px;border:none;border-radius:var(--r);font-family:'Noto Sans KR',sans-
+.save-btn{width:100%;padding:15px;border:none;border-radius:var(--r);font-family:'Noto Sans KR',sans-serif;font-size:15px;font-weight:500;cursor:pointer;transition:opacity .15s,transform .1s;margin-top:6px}
+.save-btn:active{opacity:.85;transform:scale(.98)}
+.sba{background:var(--a);color:#1a0f2e}.sbb{background:var(--b);color:#0a1e18}
+.sec-hdr-btn{font-size:12px;color:var(--text);background:var(--bg3);border:1px solid var(--border);cursor:pointer;padding:6px 12px; border-radius: 8px;}
+.filter-row{display:flex;gap:7px;padding:0 16px 12px;overflow-x:auto}
+.filter-row::-webkit-scrollbar{display:none}
+.fchip{padding:7px 14px;border:1px solid var(--border);border-radius:24px;font-size:12px;cursor:pointer;color:var(--text3);background:var(--card);transition:all .15s;white-space:nowrap;flex-shrink:0}
+.fchip.fa{background:var(--a-s);color:var(--a);border-color:var(--a)}
+.fchip.fb{background:var(--b-s);color:var(--b);border-color:var(--b)}
+.fchip.fall{background:var(--bg3);color:var(--text2);border-color:var(--border2)}
+.date-group { margin-bottom: 24px; }
+.date-group-header { font-size: 15px; font-weight: 700; color: var(--text); margin: 0 16px 12px; padding-bottom: 6px; border-bottom: 1.5px solid var(--bg3); display: flex; align-items: center; gap: 8px; }
+.hist-list{padding:0 16px}
+.hist-item{background:var(--card);border-radius:var(--r);border:.5px solid var(--border);padding:16px;margin-bottom:10px;animation:fadeUp .2s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.hist-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.hist-tag{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500}
+.tga{background:var(--a-s);color:var(--a)}.tgb{background:var(--b-s);color:var(--b)}
+.hrow{display:flex;justify-content:space-between;padding:6px 0;border-bottom:.5px solid var(--border)}
+.hrow:last-of-type{border-bottom:none}
+.hk{font-size:13px;color:var(--text3)}.hv{font-size:13px;font-weight:500}
+.pbadge{padding:2px 9px;border-radius:12px;font-size:11px;font-weight:500}
+.ok{background:var(--ok-bg);color:var(--ok)}.warn{background:var(--warn-bg);color:var(--warn)}.bad{background:var(--bad-bg);color:var(--bad)}
+.memo-box{margin-top:10px;font-size:12px;color:var(--text2);background:var(--bg3);padding:10px 12px;border-radius:8px;border-left:2px solid var(--border2)}
+.photo-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.photo-thumb{width:72px;height:72px;border-radius:10px;object-fit:cover;cursor:pointer;border:.5px solid var(--border);display:flex;align-items:center;justify-content:center;background:var(--bg3);font-size:10px;color:var(--text3);text-align:center;}
+.empty-state{text-align:center;padding:48px 20px;color:var(--text3);font-size:14px}
+.vet-list{padding:0 16px}
+.vet-item{background:var(--card);border-radius:var(--r);border:.5px solid var(--border);padding:16px;margin-bottom:10px}
+.vet-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px}
+.vet-name{font-size:15px;font-weight:500}
+.vet-who{font-size:12px;color:var(--text3);margin-top:2px}
+.vet-place{font-size:12px;color:var(--text3)}
+.vet-badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500;margin-top:10px;display:inline-block}
+.vba{background:var(--a-s);color:var(--a)}.vbb{background:var(--b-s);color:var(--b)}.vbp{background:var(--bg3);color:var(--text3)}
+.add-btn{width:100%;padding:14px;border-radius:var(--r);border:1px dashed var(--border2);background:transparent;color:var(--text3);font-family:'Noto Sans KR',sans-serif;font-size:14px;cursor:pointer;margin:4px 0 20px;transition:all .15s}
+.add-btn:active{background:var(--card)}
+.panel{display:none;background:var(--card2);border-radius:var(--r);border:.5px solid var(--border2);padding:16px;margin:0 16px 16px;animation:fadeUp .2s ease}
+.panel.open{display:block}
+.panel-title{font-size:14px;font-weight:500;margin-bottom:14px;color:var(--text2)}
+.btn-row{display:flex;gap:8px}
+.btn-cancel{flex:0 0 80px;background:var(--bg3);color:var(--text2);border:none;border-radius:var(--r);font-family:'Noto Sans KR',sans-serif;font-size:14px;cursor:pointer;padding:13px}
+.photo-upload-area{border:1px dashed var(--border2);border-radius:var(--rs);padding:16px;text-align:center;cursor:pointer;color:var(--text3);font-size:13px;background:var(--card);position:relative;overflow:hidden}
+.photo-upload-area input{position:absolute;inset:0;opacity:0;cursor:pointer;font-size:0}
+.photo-preview-list{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.photo-preview-item{position:relative;width:72px;height:72px}
+.photo-preview-item img{width:72px;height:72px;border-radius:10px;object-fit:cover;border:.5px solid var(--border)}
+.photo-remove{position:absolute;top:-5px;right:-5px;width:18px;height:18px;border-radius:50%;background:var(--bad);color:#fff;border:none;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+.custom-field-row{display:flex;gap:8px;align-items:flex-end;margin-bottom:10px}
+.custom-field-row .fi{flex:1}
+.profile-card{background:var(--card);border-radius:var(--r);border:.5px solid var(--border);padding:20px;margin:0 16px 12px}
+.profile-header{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.profile-avatar{font-size:42px;line-height:1}
+.profile-name{font-family:'DM Serif Display',serif;font-size:22px}
+.profile-sub{font-size:13px;color:var(--text3);margin-top:2px}
+.gdrive-card{margin:0 16px 16px;background:var(--card);border-radius:var(--r);border:.5px solid var(--border);padding:18px}
+.gdrive-title{font-size:13px;font-weight:500;color:var(--text2);margin-bottom:4px}
+.gdrive-desc{font-size:12px;color:var(--text3);line-height:1.6;margin-bottom:14px}
+.gdrive-btn{width:100%;padding:13px;border:none;border-radius:var(--rs);font-family:'Noto Sans KR',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:opacity .15s,transform .1s;display:flex;align-items:center;justify-content:center;gap:8px}
+.gdrive-btn:active{opacity:.85;transform:scale(.98)}
+.gdi{background:var(--bg3);color:var(--text2);border:1px solid var(--border2)}
+.gdo{background:rgba(94,207,176,.18);color:var(--b);border:1px solid var(--b)}
+.gdrive-status{font-size:11px;color:var(--text3);text-align:center;margin-top:8px;min-height:16px}
+.share-card{margin:0 16px 16px;background:var(--card);border-radius:var(--r);border:.5px solid var(--border);padding:18px}
+.share-title{font-size:13px;font-weight:500;color:var(--text2);margin-bottom:4px}
+.share-link-box{background:var(--bg3);border:.5px solid var(--border2);border-radius:var(--rs);padding:10px 14px;font-size:12px;color:var(--text2);word-break:break-all;margin-bottom:10px;display:none}
+.share-btn-row{display:flex;gap:8px}
+.share-btn{flex:1;padding:12px;border:none;border-radius:var(--rs);font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:500;cursor:pointer;background:var(--bg3);color:var(--text2);border:.5px solid var(--border2);transition:all .15s}
+.share-btn.primary{background:var(--a-s);color:var(--a);border-color:var(--a)}
+.cfield-item{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:.5px solid var(--border)}
+.cfield-item:last-of-type{border-bottom:none}
+.tab-bar{position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:.5px solid var(--border);display:flex;z-index:100;padding-bottom:var(--safe);max-width:480px;margin:0 auto}
+.tbtn{flex:1;padding:10px 4px;border:none;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-family:'Noto Sans KR',sans-serif;font-size:10px;color:var(--text3);transition:color .15s}
+.tbtn.active{color:var(--a)}
+.tbtn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.6}
+.toast{display:none;position:fixed;bottom:calc(var(--tab-h) + var(--safe) + 12px);left:50%;transform:translateX(-50%);background:var(--a);color:#1a0f2e;padding:10px 20px;border-radius:24px;font-size:13px;font-weight:500;z-index:200;white-space:nowrap;animation:toastIn .2s ease}
+.toast.show{display:block}
+.toast.tb{background:var(--b);color:#0a1e18}
+.lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:300;align-items:center;justify-content:center}
+.lightbox.open{display:flex}
+.lightbox img{max-width:95vw;max-height:90dvh;border-radius:12px;object-fit:contain}
+.lb-close {position: absolute; top: calc(20px + env(safe-area-inset-top, 0px)); right: 20px; background: rgba(255, 255, 255, 0.25); border: 1px solid rgba(255, 255, 255, 0.5); color: #fff; font-size: 26px; width: 48px; height: 48px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 9999; -webkit-tap-highlight-color: transparent;}
+.share-view-banner{background:var(--a-s);border:.5px solid var(--a);border-radius:var(--r);margin:0 16px 16px;padding:12px 16px;font-size:12px;color:var(--a);text-align:center}
+@media print {
+  body { background: #fff !important; color: #000 !important; }
+  .app * { visibility: hidden; }
+  #s-vet, #s-vet * { visibility: visible; }
+  #s-vet { position: absolute; left: 0; top: 0; width: 100%; }
+  .topbar, .tab-bar, .add-btn, .fchip, .panel, .print-btn-wrap { display: none !important; }
+  .vet-item { background: #fff !important; border: 1px solid #ddd !important; break-inside: avoid; margin-bottom: 15px; padding: 15px; color:#000; }
+  .vet-name { color: #000; }
+  .vet-place, .vet-who { color: #555; }
+  .vet-badge, .sec-hdr-btn { background: #f0f0f0 !important; color: #000 !important; border: 1px solid #ccc !important; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<div id="s-home" class="screen active">
+  <div class="topbar">
+    <h1>태산이와 또팔이</h1>
+    <div class="top-btns">
+      <button class="refresh-btn" onclick="gdriveSync()">🔄 동기화</button>
+      <span class="date-badge" id="today-lbl"></span>
+    </div>
+  </div>
+  <div class="cat-row" id="home-cat-row"></div>
+  <div class="stat-grid" id="home-stats"></div>
+  <div class="chart-card"><div class="chart-lbl"><span>최근 체중 변화</span></div><div class="bars" id="home-bars"></div></div>
+  <div id="custom-charts"></div>
+  <button class="log-btn" id="home-log-btn" onclick="switchTab('record')"></button>
+</div>
+
+<div id="s-record" class="screen">
+  <div class="topbar"><h1>기록하기</h1></div>
+  <div class="cat-row" id="rec-cat-row"></div>
+  <div class="form-body">
+    <div class="fg"><label class="fl">날짜</label><input type="date" class="fi" id="rec-date"></div>
+    <div class="fg"><label class="fl">체중 (kg)</label><input type="number" step="0.1" min="0" max="30" class="fi" id="rec-weight" placeholder="예: 4.2"></div>
+    <div class="fg"><label class="fl">식사 횟수</label><div class="chips" id="g-meal">
+      <div class="chip" data-g="meal" onclick="selChip(this)">1회</div><div class="chip" data-g="meal" onclick="selChip(this)">2회</div><div class="chip" data-g="meal" onclick="selChip(this)">3회 이상</div><div class="chip" data-g="meal" onclick="selChip(this)">거름</div>
+    </div></div>
+    <div class="fg"><label class="fl">배변 상태</label><div class="chips" id="g-poop">
+      <div class="chip" data-g="poop" onclick="selChip(this)">정상</div><div class="chip" data-g="poop" onclick="selChip(this)">설사</div><div class="chip" data-g="poop" onclick="selChip(this)">변비</div><div class="chip" data-g="poop" onclick="selChip(this)">혈변</div><div class="chip" data-g="poop" onclick="selChip(this)">없음</div>
+    </div></div>
+    <div class="fg"><label class="fl">컨디션</label><div class="chips" id="g-cond">
+      <div class="chip" data-g="cond" onclick="selChip(this)">😺 활발</div><div class="chip" data-g="cond" onclick="selChip(this)">😸 보통</div><div class="chip" data-g="cond" onclick="selChip(this)">😿 무기력</div><div class="chip" data-g="cond" onclick="selChip(this)">🤒 아픔</div>
+    </div></div>
+    <div class="fg"><label class="fl">음수량</label><div class="chips" id="g-water">
+      <div class="chip" data-g="water" onclick="selChip(this)">적음</div><div class="chip" data-g="water" onclick="selChip(this)">보통</div><div class="chip" data-g="water" onclick="selChip(this)">많음</div>
+    </div></div>
+    <div id="custom-field-inputs"></div>
+    <div class="fg"><label class="fl">사진 첨부 (선택)</label>
+      <div class="photo-upload-area" id="photo-drop-zone"><input type="file" accept="image/*" multiple onchange="handlePhotoSelect(event)" id="photo-input"><span style="font-size:24px">📷</span><br><span>탭하여 사진 선택 · 촬영</span><br><span style="font-size:11px;margin-top:4px;display:block">자동으로 압축 후 드라이브에 업로드됩니다</span></div>
+      <div class="photo-preview-list" id="photo-preview-list"></div>
+    </div>
+    <div class="fg"><label class="fl">메모 (선택)</label><textarea class="fi" id="rec-memo" rows="3" placeholder="특이사항, 증상 등"></textarea></div>
+    <button class="save-btn sba" id="rec-save-btn" onclick="saveRecord()">기록 저장</button>
+  </div>
+</div>
+
+<div id="s-history" class="screen">
+  <div class="topbar"><h1>기록 모아보기</h1></div>
+  <div class="filter-row" id="hist-filters"></div>
+  <div id="hist-list"></div> 
+</div>
+
+<div id="s-vet" class="screen">
+  <div class="topbar"><h1>병원 & 접종</h1></div>
+  <div class="filter-row" id="vet-filters"></div>
+  
+  <div class="print-btn-wrap" style="padding:0 16px 12px;">
+    <button class="sec-hdr-btn" style="width:100%; padding:10px; font-size:14px; display:flex; justify-content:center; align-items:center; gap:8px;" onclick="window.print()">
+      📄 문서로 출력하기 (PDF 저장)
+    </button>
+  </div>
+
+  <div class="panel" id="vet-panel">
+    <div class="panel-title">새 기록 추가</div>
+    <div class="fg"><label class="fl">고양이</label><div class="chips" id="vg-cat"><div class="chip" data-g="vcat" onclick="selChip(this)"></div><div class="chip" data-g="vcat" onclick="selChip(this)"></div></div></div>
+    <div class="fg"><label class="fl">종류</label><div class="chips" id="vg-type"><div class="chip" data-g="vtype" onclick="selChip(this)">접종</div><div class="chip" data-g="vtype" onclick="selChip(this)">검진</div><div class="chip" data-g="vtype" onclick="selChip(this)">치료</div></div></div>
+    <div class="fg"><label class="fl">항목명</label><input type="text" class="fi" id="v-title" placeholder="예: 종합백신 FVRCP"></div>
+    <div class="fg"><label class="fl">병원명</label><input type="text" class="fi" id="v-place" placeholder="예: 강남고양이동물병원"></div>
+    <div class="fg"><label class="fl">방문 날짜</label><input type="date" class="fi" id="v-date"></div>
+    <div class="fg"><label class="fl">다음 예약일 (선택)</label><input type="date" class="fi" id="v-next"></div>
+    <div class="fg">
+      <label class="fl">진료 관련 사진 (엑스레이, 영수증 등)</label>
+      <div class="photo-upload-area" id="vet-photo-zone">
+        <input type="file" accept="image/*" multiple onchange="handleVetPhotoSelect(event)" id="vet-photo-input">
+        <span style="font-size:20px">📷</span><br><span>사진/문서 첨부</span>
+      </div>
+      <div class="photo-preview-list" id="vet-photo-preview-list"></div>
+    </div>
+    <div class="fg"><label class="fl">메모 (선택)</label><input type="text" class="fi" id="v-note" placeholder="진료 내용 등"></div>
+    <div class="btn-row"><button class="save-btn sba" style="flex:1;margin-top:0" onclick="saveVet()">저장</button><button class="btn-cancel" onclick="closePanel('vet-panel')">취소</button></div>
+  </div>
+  <div class="vet-list" id="vet-list"></div>
+  <div style="padding:0 16px" id="add-vet-wrap"><button class="add-btn" onclick="openVetPanel()">+ 병원 방문 / 접종 추가</button></div>
+</div>
+
+<div id="s-settings" class="screen">
+  <div class="topbar"><h1>설정</h1></div>
+  
+  <div class="share-card">
+    <div class="share-title">🔗 실시간 라이브 링크 공유 (의사 선생님용)</div>
+    <div class="share-desc">URL 길이 제한 없이 실시간 연동됩니다. 썸머님이 기록을 추가하면 링크를 새로 만들 필요 없이 선생님 화면에도 즉시 반영됩니다.<br><br><strong style="color:var(--bad)">⚠️ 필수: </strong>구글 드라이브에서 <strong>냥이건강수첩_backup.json</strong> 파일과 <strong>냥이건강_사진</strong> 폴더의 일반 액세스 권한을 반드시 <strong style="color:var(--text)">'링크가 있는 모든 사용자'</strong>로 변경해야만 선생님이 에러 없이 보실 수 있습니다.</div>
+    <div class="share-link-box" id="share-link-box"></div>
+    <div class="share-btn-row">
+      <button class="share-btn primary" onclick="genLiveLink()">실시간 라이브 링크 생성</button>
+      <button class="share-btn" id="share-copy-btn" onclick="copyShareLink()" style="display:none">복사</button>
+    </div>
+  </div>
+
+  <div class="gdrive-card">
+    <div class="gdrive-title">☁️ 구글 드라이브 동기화</div>
+    <div class="gdrive-desc">기록과 사진을 드라이브에 저장하고, 다른 기기에서도 불러올 수 있어요.</div>
+    <button class="gdrive-btn gdi" id="gdrive-btn" onclick="gdriveSync()">구글 드라이브 연동</button>
+    <div class="gdrive-status" id="gdrive-status">로그인 후 자동 백업</div>
+    <div class="gdrive-info">• 사진: 드라이브 내 폴더에 개별 업로드<br>• 데이터: 냥이건강수첩_backup.json 으로 저장</div>
+  </div>
+  
+  <div class="profile-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><span style="font-size:14px;font-weight:500;color:var(--text2)">📊 커스텀 건강 항목</span></div>
+    <div id="cfield-list"></div>
+    <div class="panel" id="cfield-panel" style="margin:10px 0 0;padding:14px">
+      <div class="panel-title">새 항목 추가</div>
+      <div class="fg"><label class="fl">항목 이름</label><input type="text" class="fi" id="cf-name" placeholder="예: 혈당, 체온, 심박수"></div>
+      <div class="fg"><label class="fl">단위</label><input type="text" class="fi" id="cf-unit" placeholder="예: mg/dL, ℃, bpm"></div>
+      <div class="btn-row"><button class="save-btn sba" style="flex:1;margin-top:0" onclick="saveCField()">추가</button><button class="btn-cancel" onclick="closePanel('cfield-panel')">취소</button></div>
+    </div>
+    <button class="add-btn" style="margin-top:12px;margin-bottom:0" onclick="openPanel('cfield-panel')">+ 항목 추가</button>
+  </div>
+  <div id="profile-cards"></div>
+</div>
+
+</div><div class="tab-bar">
+  <button class="tbtn active" id="tb-home" onclick="switchTab('home')"><svg viewBox="0 0 24 24"><path d="M3 12L12 3l9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/></svg>홈</button>
+  <button class="tbtn" id="tb-record" onclick="switchTab('record')"><svg viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>기록</button>
+  <button class="tbtn" id="tb-history" onclick="switchTab('history')"><svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 000 4h6a2 2 0 000-4M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>히스토리</button>
+  <button class="tbtn" id="tb-vet" onclick="switchTab('vet')"><svg viewBox="0 0 24 24"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0112 2a8 8 0 018 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg>병원</button>
+  <button class="tbtn" id="tb-settings" onclick="switchTab('settings')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82"/></svg>설정</button>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lb-close" onclick="closeLightbox()">×</button>
+  <img id="lb-img" src="" alt="">
+</div>
+
+<script>
+/* ═══════════════════════════════════
+   STORAGE & STATE
+═══════════════════════════════════ */
+const LS = { get: k => { try { return JSON.parse(localStorage.getItem(k)); } catch(e) { return null; } }, set: (k,v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {} } };
+
+let cats = LS.get('cats') || [{id:'a', name:'태산이', breed:'', age:'', emoji:'🐱'}, {id:'b', name:'또팔이', breed:'', age:'', emoji:'🐈'}];
+let records = LS.get('records') || [];
+let vets = LS.get('vets') || [];
+let cfields = LS.get('cfields') || []; 
+let curCat=0, recCat=0, histFilter='all', vetFilter='all';
+let pendingPhotos = [], pendingVetPhotos = []; 
+let editExistingPhotoIds = []; 
+let liveMode = false;
+let editIndex = -1; 
+
+function saveLocal() { LS.set('cats', cats); LS.set('records', records); LS.set('vets', vets); LS.set('cfields', cfields); }
+
+/* ═══════════════════════════════════
+   TAB / SCREEN / CHIPS
+═══════════════════════════════════ */
+const TABS = ['home','record','history','vet','settings'];
+function switchTab(t) {
+  if (liveMode && t === 'record') { showToast('라이브 모드에서는 기록할 수 없습니다.', 0); return; }
+  TABS.forEach(x => { 
+    if (document.getElementById('s-'+x)) document.getElementById('s-'+x).classList.toggle('active', x===t); 
+    if (document.getElementById('tb-'+x)) document.getElementById('tb-'+x).classList.toggle('active', x===t); 
+  });
+  if (t==='home') renderHome(); if (t==='record') renderRecForm(); if (t==='history') renderHist(); if (t==='vet') renderVet(); if (t==='settings') renderSettings();
+}
+function openPanel(id) { document.getElementById(id).classList.add('open'); }
+function closePanel(id) { document.getElementById(id).classList.remove('open'); }
+
+function makeCatRow(cid, active, fn) {
+  document.getElementById(cid).innerHTML = cats.map((c,i) => `<div class="cat-tab ${i===active?(i===0?'aa':'bb'):''}" onclick="${fn}(${i})"><span class="cat-emoji">${c.emoji}</span><div class="cat-info"><div class="cat-name">${c.name}</div><div class="cat-sub">${c.breed||'품종 미입력'}${c.age?' · '+c.age:''}</div></div><div class="cat-dot ${i===0?'da':'db'}"></div></div>`).join('');
+}
+function switchHomeCat(i) { curCat=i; renderHome(); }
+function switchRecCat(i) { recCat=i; makeCatRow('rec-cat-row', recCat, 'switchRecCat'); applyRecColors(); }
+function applyRecColors() { const s=recCat===0?'sa':'sb', o=recCat===0?'sb':'sa'; document.querySelectorAll('.chip').forEach(c => { if(c.classList.contains(o)){c.classList.remove(o);c.classList.add(s);} }); document.getElementById('rec-save-btn').className='save-btn '+(recCat===0?'sba':'sbb'); }
+
+function selChip(el) {
+  const g=el.dataset.g; const s=(g==='vcat')?(el.textContent.trim()===cats[0].name?'sa':'sb'):(recCat===0?'sa':'sb');
+  document.querySelectorAll(`.chip[data-g="${g}"]`).forEach(c=>c.classList.remove('sa','sb')); el.classList.add(s);
+}
+function getSel(g) { const s=document.querySelector(`.chip.sa[data-g="${g}"],.chip.sb[data-g="${g}"]`); return s?s.textContent.trim():''; }
+
+/* ═══════════════════════════════════
+   HOME
+═══════════════════════════════════ */
+function renderHome() {
+  const now=new Date(); document.getElementById('today-lbl').textContent=`${now.getMonth()+1}월 ${now.getDate()}일`;
+  makeCatRow('home-cat-row', curCat, 'switchHomeCat');
+  const c=cats[curCat], cid=c.id; const recs=records.filter(r=>r.cat===cid); const today=now.toISOString().split('T')[0];
+  const todayR=recs.find(r=>r.date===today); const latestW=recs.find(r=>r.weight);
+  const wVal=latestW?latestW.weight.toFixed(1)+' <span class="su">kg</span>':'—';
+  const wSub=latestW?(Math.round((Date.now()-new Date(latestW.date))/86400000)===0?'오늘 기록':Math.round((Date.now()-new Date(latestW.date))/86400000)+'일 전'):'';
+  const nextVet=vets.filter(v=>v.cat===cid&&v.next).sort((a,b)=>a.next.localeCompare(b.next))[0];
+  const dVal=nextVet?'D-'+Math.max(0,Math.round((new Date(nextVet.next)-Date.now())/86400000)):'—';
+  document.getElementById('home-stats').innerHTML=`
+    <div class="sc"><div class="sl">최근 체중</div><div class="sv">${wVal}</div><div class="ss">${wSub}</div></div>
+    <div class="sc"><div class="sl">오늘 식사</div><div class="sv" style="font-size:17px">${todayR?todayR.meal:'—'}</div><div class="ss">${todayR?'오늘 기록':'없음'}</div></div>
+    <div class="sc"><div class="sl">컨디션</div><div class="sv" style="font-size:26px">${todayR?todayR.cond.split(' ')[0]:'—'}</div><div class="ss">${todayR?(todayR.cond.split(' ')[1]||''):'기록 없음'}</div></div>
+    <div class="sc"><div class="sl">다음 접종</div><div class="sv" style="font-size:17px">${dVal}</div><div class="ss">${nextVet?nextVet.title:'일정 없음'}</div></div>`;
+  const btn=document.getElementById('home-log-btn'); 
+  if (liveMode) btn.style.display = 'none';
+  else { btn.textContent=`+ ${c.name} 오늘 기록하기`; btn.className='log-btn '+(curCat===0?'lba':'lbb'); }
+
+  const bRecs=recs.filter(r=>r.weight).slice(0,7).reverse();
+  if(bRecs.length){
+    const vals=bRecs.map(r=>r.weight), mn=Math.min(...vals), mx=Math.max(...vals), rng=mx-mn||0.5;
+    document.getElementById('home-bars').innerHTML=bRecs.map(r=>{
+      const h=Math.round(12+((r.weight-mn)/rng)*44); return `<div class="bar-col"><div class="bar ${curCat===0?'ba':'bb2'}" style="height:${h}px"></div><div class="bar-date">${r.date.slice(5)}</div></div>`;
+    }).join('');
+  } else { document.getElementById('home-bars').innerHTML='<div style="font-size:12px;color:var(--text3)">기록이 쌓이면 나타납니다</div>'; }
+  renderCustomCharts(cid);
+}
+
+function renderCustomCharts(cid) {
+  const wrap=document.getElementById('custom-charts'); if(!cfields.length){wrap.innerHTML='';return;}
+  wrap.innerHTML=cfields.map(cf=>{
+    const pts=records.filter(r=>r.cat===cid&&r.custom&&r.custom[cf.id]!=null).slice(0,10).reverse();
+    if(!pts.length) return '';
+    const vals=pts.map(r=>parseFloat(r.custom[cf.id])); const mn=Math.min(...vals), mx=Math.max(...vals), rng=mx-mn||1;
+    const W=320, H=80, pad=8; const sx=(i)=>pad+(i/(pts.length-1||1))*(W-pad*2); const sy=(v)=>H-pad-((v-mn)/rng)*(H-pad*2);
+    const pathD=vals.map((v,i)=>`${i===0?'M':'L'}${sx(i).toFixed(1)},${sy(v).toFixed(1)}`).join(' ');
+    const dots=vals.map((v,i)=>`<circle cx="${sx(i).toFixed(1)}" cy="${sy(v).toFixed(1)}" r="3" fill="${curCat===0?'#b48be4':'#5ecfb0'}"/>`).join('');
+    const labels=pts.map((r,i)=>`<text x="${sx(i).toFixed(1)}" y="${H}" font-size="9" fill="#6b6990" text-anchor="middle">${r.date.slice(5)}</text>`).join('');
+    return `<div class="chart-card" style="margin-bottom:10px">
+      <div class="chart-lbl"><span>${cf.name}</span><span style="font-size:13px;font-weight:500;color:var(--text)">${vals[vals.length-1]} <span style="font-size:11px;color:var(--text3)">${cf.unit}</span></span></div>
+      <svg viewBox="0 0 ${W} ${H+4}" style="width:100%;height:90px;overflow:visible"><path d="${pathD}" stroke="${curCat===0?'#b48be4':'#5ecfb0'}" stroke-width="2" fill="none" stroke-linejoin="round" stroke-linecap="round"/>${dots}${labels}</svg>
+    </div>`;
+  }).join('');
+}
+
+/* ═══════════════════════════════════
+   RECORD FORM & PHOTO EDITING
+═══════════════════════════════════ */
+function renderRecForm() {
+  makeCatRow('rec-cat-row', recCat, 'switchRecCat');
+  if (editIndex === -1) { 
+    document.getElementById('rec-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('rec-weight').value = ''; document.getElementById('rec-memo').value = ''; 
+    pendingPhotos = []; editExistingPhotoIds = []; document.getElementById('photo-preview-list').innerHTML = '';
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('sa','sb')); const sc = recCat===0 ? 'sa' : 'sb';
+    document.querySelector('#g-meal .chip:nth-child(2)').classList.add(sc); document.querySelector('#g-poop .chip:nth-child(1)').classList.add(sc);
+    document.querySelector('#g-cond .chip:nth-child(2)').classList.add(sc); document.querySelector('#g-water .chip:nth-child(2)').classList.add(sc);
+    document.getElementById('custom-field-inputs').innerHTML = cfields.map(cf=>`<div class="fg"><label class="fl">${cf.name}${cf.unit?' ('+cf.unit+')':''}</label><input type="number" step="any" class="fi" id="cf-val-${cf.id}" placeholder="수치 입력"></div>`).join('');
+  }
+  const saveBtn = document.getElementById('rec-save-btn');
+  saveBtn.className = 'save-btn ' + (recCat===0 ? 'sba' : 'sbb');
+  saveBtn.textContent = (editIndex > -1) ? '수정 내용 저장' : '기록 저장'; saveBtn.disabled = false;
+}
+
+function loadForEdit(idx) {
+  editIndex = idx; const r = records[idx]; const catIdx = cats.findIndex(c => c.id === r.cat);
+  switchRecCat(catIdx); switchTab('record');
+  document.getElementById('rec-date').value = r.date; document.getElementById('rec-weight').value = r.weight || ''; document.getElementById('rec-memo').value = r.memo || '';
+  ['meal','poop','cond','water'].forEach(g => { document.querySelectorAll(`.chip[data-g="${g}"]`).forEach(c => { if(c.textContent.trim() === r[g]) c.classList.add(catIdx===0 ? 'sa' : 'sb'); else c.classList.remove('sa','sb'); }); });
+  document.getElementById('custom-field-inputs').innerHTML = cfields.map(cf=>{ const v = (r.custom && r.custom[cf.id] != null) ? r.custom[cf.id] : ''; return `<div class="fg"><label class="fl">${cf.name}${cf.unit?' ('+cf.unit+')':''}</label><input type="number" step="any" class="fi" id="cf-val-${cf.id}" value="${v}" placeholder="수치 입력"></div>`; }).join('');
+  
+  editExistingPhotoIds = r.photoIds ? [...r.photoIds] : [];
+  pendingPhotos = [];
+  renderPhotoPreviews(); 
+  showToast('데이터를 불러왔습니다.', catIdx);
+}
+
+async function saveRecord() {
+  const btn = document.getElementById('rec-save-btn'); btn.disabled = true; btn.textContent = '저장 중…';
+  try {
+    const newPhotoIds = []; 
+    for (const p of pendingPhotos) { const fid = await gdriveUploadPhoto(p.dataUrl, p.filename); if (fid) newPhotoIds.push(fid); }
+    const finalPhotoIds = [...editExistingPhotoIds, ...newPhotoIds];
+    const custom = {}; cfields.forEach(cf => { const v = document.getElementById('cf-val-' + cf.id)?.value; if (v !== '' && v != null) custom[cf.id] = parseFloat(v); });
+    const newRecord = { cat: cats[recCat].id, date: document.getElementById('rec-date').value || new Date().toISOString().split('T')[0], weight: parseFloat(document.getElementById('rec-weight').value) || null, meal: getSel('meal') || '—', poop: getSel('poop') || '—', cond: getSel('cond') || '—', water: getSel('water') || '—', custom, photoIds: finalPhotoIds, memo: document.getElementById('rec-memo').value.trim() };
+    const existingIdx = records.findIndex(r => r.cat === newRecord.cat && r.date === newRecord.date);
+    if (editIndex > -1) { records[editIndex] = newRecord; editIndex = -1; } 
+    else if (existingIdx > -1) { records[existingIdx] = newRecord; } 
+    else { records.unshift(newRecord); }
+    records.sort((a, b) => b.date.localeCompare(a.date)); saveLocal(); await gdriveAutoUpload(); 
+    showToast(cats[recCat].name + ' 기록 저장 완료!', recCat); pendingPhotos = []; editExistingPhotoIds = []; renderRecForm(); switchTab('history');
+  } catch (e) { showToast('저장 중 오류가 발생했습니다.', 0); btn.disabled = false; btn.textContent = '다시 시도'; }
+}
+
+async function deleteRecord(idx) { if (!confirm('이 기록을 정말 삭제할까요?')) return; records.splice(idx, 1); saveLocal(); renderHist(); renderHome(); await gdriveAutoUpload(); showToast('기록이 삭제되었습니다.', 0); }
+
+/* ═══════════════════════════════════
+   PHOTOS
+═══════════════════════════════════ */
+function handlePhotoSelect(e) { [...e.target.files].forEach(f => compressImage(f, dataUrl => { pendingPhotos.push({dataUrl, filename:`photo_${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`}); renderPhotoPreviews(); })); e.target.value=''; }
+function handleVetPhotoSelect(e) { [...e.target.files].forEach(f => compressImage(f, dataUrl => { pendingVetPhotos.push({dataUrl, filename:`vet_${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`}); renderVetPhotoPreviews(); })); e.target.value=''; }
+
+function compressImage(file, cb) {
+  const img=new Image(); const reader=new FileReader();
+  reader.onload=e=>{ img.onload=()=>{ const maxW=1200, maxH=1200; let w=img.width, h=img.height; if(w>maxW||h>maxH){ const ratio=Math.min(maxW/w,maxH/h); w=Math.round(w*ratio); h=Math.round(h*ratio); } const canvas=document.createElement('canvas'); canvas.width=w; canvas.height=h; canvas.getContext('2d').drawImage(img,0,0,w,h); cb(canvas.toDataURL('image/jpeg',0.75)); }; img.src=e.target.result; }; reader.readAsDataURL(file);
+}
+
+function renderPhotoPreviews() { 
+  let html = '';
+  editExistingPhotoIds.forEach((fid, i) => {
+    const url = photoCache[fid] || `https://drive.google.com/uc?export=view&id=${fid}`;
+    html += `<div class="photo-preview-item"><img src="${url}" onerror="this.src='https://placehold.co/72?text=로딩중'"><button class="photo-remove" onclick="removeExistingPhoto(${i})">×</button></div>`;
+  });
+  pendingPhotos.forEach((p, i) => {
+    html += `<div class="photo-preview-item"><img src="${p.dataUrl}"><button class="photo-remove" onclick="removePendingPhoto(${i})">×</button></div>`;
+  });
+  document.getElementById('photo-preview-list').innerHTML = html; 
+}
+function renderVetPhotoPreviews() { document.getElementById('vet-photo-preview-list').innerHTML=pendingVetPhotos.map((p,i)=>`<div class="photo-preview-item"><img src="${p.dataUrl}"><button class="photo-remove" onclick="removePendingVetPhoto(${i})">×</button></div>`).join(''); }
+function removePendingPhoto(i) { pendingPhotos.splice(i,1); renderPhotoPreviews(); }
+function removeExistingPhoto(i) { editExistingPhotoIds.splice(i,1); renderPhotoPreviews(); }
+function removePendingVetPhoto(i) { pendingVetPhotos.splice(i,1); renderVetPhotoPreviews(); }
+
+/* ═══════════════════════════════════
+   HISTORY
+═══════════════════════════════════ */
+function setHistFilter(f){histFilter=f;renderHist();}
+function renderHist() {
+  const list = document.getElementById('hist-list');
+  document.getElementById('hist-filters').innerHTML=`<div class="fchip ${histFilter==='all'?'fall':''}" onclick="setHistFilter('all')">전체</div><div class="fchip ${histFilter==='a'?'fa':''}" onclick="setHistFilter('a')">${cats[0].emoji} ${cats[0].name}</div><div class="fchip ${histFilter==='b'?'fb':''}" onclick="setHistFilter('b')">${cats[1].emoji} ${cats[1].name}</div>`;
+  
+  const filtered = histFilter==='all' ? records : records.filter(r=>r.cat===histFilter);
+  if(!filtered.length){list.innerHTML='<div class="empty-state">기록이 없습니다.</div>';return;}
+  
+  const grouped = {};
+  filtered.forEach(r => { if(!grouped[r.date]) grouped[r.date] = []; grouped[r.date].push(r); });
+  const sortedDates = Object.keys(grouped).sort((a,b) => b.localeCompare(a)); 
+
+  list.innerHTML = sortedDates.map(date => {
+    const itemsHtml = grouped[date].map(r => {
+      const c=cats.find(x=>x.id===r.cat);
+      const pb=r.poop==='정상'?'ok':(r.poop==='혈변'?'bad':(r.poop==='없음'?'':'warn'));
+      const customRows=cfields.filter(cf=>r.custom&&r.custom[cf.id]!=null).map(cf=>`<div class="hrow"><span class="hk">${cf.name}</span><span class="hv">${r.custom[cf.id]} <span style="font-size:11px;color:var(--text3)">

@@ -761,8 +761,10 @@ window.onload = async () => {
     document.querySelector('.tab-bar').style.display = 'none'; // 의사선생님은 하단 메뉴 숨김
     
     try {
-      // 로그인 없이 공개된 구글 드라이브 파일 읽기
-      const res = await fetch(`https://drive.google.com/uc?export=download&id=${liveId}`);
+      // 💡 핵심 수정: 브라우저 보안(CORS) 차단을 뚫기 위해 프록시(allorigins) 우회로 사용
+      const targetUrl = encodeURIComponent(`https://drive.google.com/uc?export=download&id=${liveId}`);
+      const res = await fetch(`https://api.allorigins.win/raw?url=${targetUrl}`);
+      
       if(!res.ok) throw new Error('Cannot fetch');
       const data = await res.json();
       cats = data.cats; records = data.records; vets = data.vets || []; cfields = data.cfields || [];

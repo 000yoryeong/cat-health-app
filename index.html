@@ -189,18 +189,7 @@ textarea.fi{resize:none;line-height:1.6}
   <div class="form-body">
     <div class="fg"><label class="fl">날짜</label><input type="date" class="fi" id="rec-date"></div>
     <div class="fg"><label class="fl">체중 (kg)</label><input type="number" step="0.1" min="0" max="30" class="fi" id="rec-weight" placeholder="예: 4.2"></div>
-    <div class="fg"><label class="fl">식사 횟수</label><div class="chips" id="g-meal">
-      <div class="chip" data-g="meal" onclick="selChip(this)">1회</div><div class="chip" data-g="meal" onclick="selChip(this)">2회</div><div class="chip" data-g="meal" onclick="selChip(this)">3회 이상</div><div class="chip" data-g="meal" onclick="selChip(this)">거름</div>
-    </div></div>
-    <div class="fg"><label class="fl">배변 상태</label><div class="chips" id="g-poop">
-      <div class="chip" data-g="poop" onclick="selChip(this)">정상</div><div class="chip" data-g="poop" onclick="selChip(this)">설사</div><div class="chip" data-g="poop" onclick="selChip(this)">변비</div><div class="chip" data-g="poop" onclick="selChip(this)">혈변</div><div class="chip" data-g="poop" onclick="selChip(this)">없음</div>
-    </div></div>
-    <div class="fg"><label class="fl">컨디션</label><div class="chips" id="g-cond">
-      <div class="chip" data-g="cond" onclick="selChip(this)">😺 활발</div><div class="chip" data-g="cond" onclick="selChip(this)">😸 보통</div><div class="chip" data-g="cond" onclick="selChip(this)">😿 무기력</div><div class="chip" data-g="cond" onclick="selChip(this)">🤒 아픔</div>
-    </div></div>
-    <div class="fg"><label class="fl">음수량</label><div class="chips" id="g-water">
-      <div class="chip" data-g="water" onclick="selChip(this)">적음</div><div class="chip" data-g="water" onclick="selChip(this)">보통</div><div class="chip" data-g="water" onclick="selChip(this)">많음</div>
-    </div></div>
+    <div class="fg"><label class="fl">오늘 메뉴</label><textarea class="fi" id="rec-menu" rows="2" placeholder="예: 아침 - 로얄캐닌 키튼 / 저녁 - 로파파 닭고기 파우치"></textarea></div>
     <div id="custom-field-inputs"></div>
     <div class="fg"><label class="fl">사진 첨부 (선택)</label>
       <div class="photo-upload-area" id="photo-drop-zone"><input type="file" accept="image/*" multiple onchange="handlePhotoSelect(event)" id="photo-input"><span style="font-size:24px">📷</span><br><span>탭하여 사진 선택 · 촬영</span><br><span style="font-size:11px;margin-top:4px;display:block">자동으로 압축 후 드라이브에 업로드됩니다</span></div>
@@ -359,10 +348,27 @@ function renderHome() {
   const wSub=latestW?(Math.round((Date.now()-new Date(latestW.date))/86400000)===0?'오늘 기록':Math.round((Date.now()-new Date(latestW.date))/86400000)+'일 전'):'';
   const nextVet=vets.filter(v=>v.cat===cid&&v.next).sort((a,b)=>a.next.localeCompare(b.next))[0];
   const dVal=nextVet?'D-'+Math.max(0,Math.round((new Date(nextVet.next)-Date.now())/86400000)):'—';
+  // 마지막 백업 시간 계산
+  const lastBackup = parseInt(localStorage.getItem('gd_last_backup')||'0', 10);
+  let backupVal='—', backupSub='없음', backupCls='';
+  if(lastBackup){
+    const diffMin = Math.floor((Date.now()-lastBackup)/60000);
+    if(diffMin<1){ backupVal='방금'; backupSub='연결됨 ✓'; }
+    else if(diffMin<60){ backupVal=diffMin+'분 전'; backupSub='최신'; }
+    else if(diffMin<60*24){ backupVal=Math.floor(diffMin/60)+'시간 전'; backupSub='최신'; }
+    else { 
+      const days=Math.floor(diffMin/(60*24));
+      backupVal=days+'일 전';
+      if(days>=7){ backupSub='⚠️ 오래됨'; backupCls='style="color:var(--bad)"'; }
+      else if(days>=3){ backupSub='확인 필요'; backupCls='style="color:var(--warn,#f59e0b)"'; }
+      else { backupSub='정상'; }
+    }
+  }
+  const todayMenu = todayR?.menu || (todayR?.meal && todayR.meal!=='—' ? todayR.meal : '');
   document.getElementById('home-stats').innerHTML=`
     <div class="sc"><div class="sl">최근 체중</div><div class="sv">${wVal}</div><div class="ss">${wSub}</div></div>
-    <div class="sc"><div class="sl">오늘 식사</div><div class="sv" style="font-size:17px">${todayR?todayR.meal:'—'}</div><div class="ss">${todayR?'오늘 기록':'없음'}</div></div>
-    <div class="sc"><div class="sl">컨디션</div><div class="sv" style="font-size:26px">${todayR?todayR.cond.split(' ')[0]:'—'}</div><div class="ss">${todayR?(todayR.cond.split(' ')[1]||''):'기록 없음'}</div></div>
+    <div class="sc"><div class="sl">오늘 메뉴</div><div class="sv" style="font-size:13px;line-height:1.3;font-weight:400;white-space:pre-wrap;word-break:break-word">${todayMenu||'—'}</div><div class="ss">${todayR?'오늘 기록':'없음'}</div></div>
+    <div class="sc"><div class="sl">마지막 백업</div><div class="sv" style="font-size:17px" ${backupCls}>${backupVal}</div><div class="ss" ${backupCls}>${backupSub}</div></div>
     <div class="sc"><div class="sl">다음 접종</div><div class="sv" style="font-size:17px">${dVal}</div><div class="ss">${nextVet?nextVet.title:'일정 없음'}</div></div>`;
   const btn=document.getElementById('home-log-btn'); 
   if (liveMode) btn.style.display = 'none';
@@ -403,10 +409,9 @@ function renderRecForm() {
   if (editIndex === -1) { 
     document.getElementById('rec-date').value = new Date().toISOString().split('T')[0];
     document.getElementById('rec-weight').value = ''; document.getElementById('rec-memo').value = ''; 
+    document.getElementById('rec-menu').value = '';
     pendingPhotos = []; editExistingPhotoIds = []; document.getElementById('photo-preview-list').innerHTML = '';
-    document.querySelectorAll('.chip').forEach(c => c.classList.remove('sa','sb')); const sc = recCat===0 ? 'sa' : 'sb';
-    document.querySelector('#g-meal .chip:nth-child(2)').classList.add(sc); document.querySelector('#g-poop .chip:nth-child(1)').classList.add(sc);
-    document.querySelector('#g-cond .chip:nth-child(2)').classList.add(sc); document.querySelector('#g-water .chip:nth-child(2)').classList.add(sc);
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('sa','sb'));
     document.getElementById('custom-field-inputs').innerHTML = cfields.map(cf=>`<div class="fg"><label class="fl">${cf.name}${cf.unit?' ('+cf.unit+')':''}</label><input type="number" step="any" class="fi" id="cf-val-${cf.id}" placeholder="수치 입력"></div>`).join('');
   }
   const saveBtn = document.getElementById('rec-save-btn');
@@ -418,7 +423,8 @@ function loadForEdit(idx) {
   editIndex = idx; const r = records[idx]; const catIdx = cats.findIndex(c => c.id === r.cat);
   switchRecCat(catIdx); switchTab('record');
   document.getElementById('rec-date').value = r.date; document.getElementById('rec-weight').value = r.weight || ''; document.getElementById('rec-memo').value = r.memo || '';
-  ['meal','poop','cond','water'].forEach(g => { document.querySelectorAll(`.chip[data-g="${g}"]`).forEach(c => { if(c.textContent.trim() === r[g]) c.classList.add(catIdx===0 ? 'sa' : 'sb'); else c.classList.remove('sa','sb'); }); });
+  document.getElementById('rec-menu').value = r.menu || '';
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('sa','sb'));
   document.getElementById('custom-field-inputs').innerHTML = cfields.map(cf=>{ const v = (r.custom && r.custom[cf.id] != null) ? r.custom[cf.id] : ''; return `<div class="fg"><label class="fl">${cf.name}${cf.unit?' ('+cf.unit+')':''}</label><input type="number" step="any" class="fi" id="cf-val-${cf.id}" value="${v}" placeholder="수치 입력"></div>`; }).join('');
   
   editExistingPhotoIds = r.photoIds ? [...r.photoIds] : [];
@@ -440,7 +446,17 @@ async function saveRecord() {
     }
     const finalPhotoIds = [...editExistingPhotoIds, ...newPhotoIds];
     const custom = {}; cfields.forEach(cf => { const v = document.getElementById('cf-val-' + cf.id)?.value; if (v !== '' && v != null) custom[cf.id] = parseFloat(v); });
-    const newRecord = { cat: cats[recCat].id, date: document.getElementById('rec-date').value || new Date().toISOString().split('T')[0], weight: parseFloat(document.getElementById('rec-weight').value) || null, meal: getSel('meal') || '—', poop: getSel('poop') || '—', cond: getSel('cond') || '—', water: getSel('water') || '—', custom, photoIds: finalPhotoIds, memo: document.getElementById('rec-memo').value.trim() };
+    // 편집 중이면 기존 record의 레거시 필드(meal/poop/cond/water) 보존, 아니면 빈 값
+    const prevR = editIndex > -1 ? records[editIndex] : null;
+    const newRecord = { 
+      cat: cats[recCat].id, 
+      date: document.getElementById('rec-date').value || new Date().toISOString().split('T')[0], 
+      weight: parseFloat(document.getElementById('rec-weight').value) || null, 
+      menu: document.getElementById('rec-menu').value.trim(),
+      meal: prevR?.meal || '', poop: prevR?.poop || '', cond: prevR?.cond || '', water: prevR?.water || '',
+      custom, photoIds: finalPhotoIds, 
+      memo: document.getElementById('rec-memo').value.trim() 
+    };
     const existingIdx = records.findIndex(r => r.cat === newRecord.cat && r.date === newRecord.date);
     if (editIndex > -1) { records[editIndex] = newRecord; editIndex = -1; } 
     else if (existingIdx > -1) { records[existingIdx] = newRecord; } 
@@ -531,10 +547,11 @@ function renderHist() {
           </div>
         </div>
         ${r.weight?`<div class="hrow"><span class="hk">체중</span><span class="hv">${r.weight.toFixed(1)} kg</span></div>`:''}
-        <div class="hrow"><span class="hk">식사</span><span class="hv">${r.meal}</span></div>
-        <div class="hrow"><span class="hk">배변</span><span class="hv"><span class="pbadge ${pb}">${r.poop}</span></span></div>
-        <div class="hrow"><span class="hk">컨디션</span><span class="hv">${r.cond}</span></div>
-        <div class="hrow"><span class="hk">음수</span><span class="hv">${r.water}</span></div>
+        ${r.menu?`<div class="hrow"><span class="hk">메뉴</span><span class="hv" style="text-align:right;max-width:65%;white-space:pre-wrap;line-height:1.4">${r.menu}</span></div>`:''}
+        ${r.meal&&r.meal!=='—'?`<div class="hrow"><span class="hk">식사</span><span class="hv">${r.meal}</span></div>`:''}
+        ${r.poop&&r.poop!=='—'?`<div class="hrow"><span class="hk">배변</span><span class="hv"><span class="pbadge ${pb}">${r.poop}</span></span></div>`:''}
+        ${r.cond&&r.cond!=='—'?`<div class="hrow"><span class="hk">컨디션</span><span class="hv">${r.cond}</span></div>`:''}
+        ${r.water&&r.water!=='—'?`<div class="hrow"><span class="hk">음수</span><span class="hv">${r.water}</span></div>`:''}
         ${customRows}
         <div class="photo-row">${photoHtml}</div>
         ${r.memo?`<div class="memo-box">${r.memo}</div>`:''}
@@ -715,8 +732,11 @@ function mergeAndApply(remote){
 }
 async function gdriveUploadJSON(){
   const payload=JSON.stringify({cats,records,vets,cfields,savedAt:new Date().toISOString()}); const blob=new Blob([payload],{type:'application/json'});
-  if(driveFileId){ await fetch(`https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=media`, {method:'PATCH',headers:{Authorization:'Bearer '+accessToken,'Content-Type':'application/json'},body:blob}); } 
-  else { const form=new FormData(); form.append('metadata',new Blob([JSON.stringify({name:'냥이건강수첩_backup.json'})],{type:'application/json'})); form.append('file',blob); const res=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {method:'POST',headers:{Authorization:'Bearer '+accessToken},body:form}); const d=await res.json(); driveFileId=d.id; LS.set('driveFileId', driveFileId); }
+  let res;
+  if(driveFileId){ res=await fetch(`https://www.googleapis.com/upload/drive/v3/files/${driveFileId}?uploadType=media`, {method:'PATCH',headers:{Authorization:'Bearer '+accessToken,'Content-Type':'application/json'},body:blob}); } 
+  else { const form=new FormData(); form.append('metadata',new Blob([JSON.stringify({name:'냥이건강수첩_backup.json'})],{type:'application/json'})); form.append('file',blob); res=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {method:'POST',headers:{Authorization:'Bearer '+accessToken},body:form}); const d=await res.json(); driveFileId=d.id; LS.set('driveFileId', driveFileId); }
+  if(!res.ok){ if(res.status===401) throw new Error('TOKEN_EXPIRED'); throw new Error('UPLOAD_FAIL_'+res.status); }
+  localStorage.setItem('gd_last_backup', String(Date.now()));
 }
 async function gdriveUploadPhoto(dataUrl, filename){
   if(!accessToken) throw new Error('NO_TOKEN');
@@ -741,7 +761,15 @@ async function gdriveFindFile(name) {
   const d = await res.json(); return d.files && d.files.length ? d.files[0].id : null; 
 }
 async function gdriveDownloadJSON(fid){ try{ const res=await fetch(`https://www.googleapis.com/drive/v3/files/${fid}?alt=media`,{headers:{Authorization:'Bearer '+accessToken}}); return await res.json(); }catch(e){return null;} }
-async function gdriveAutoUpload(){ if(!accessToken) return; try{await gdriveUploadJSON();}catch(e){} }
+async function gdriveAutoUpload(){ 
+  if(!accessToken){ showToast('드라이브 미연결 — 설정에서 연결하세요.', 0); return; }
+  try{ 
+    await gdriveUploadJSON(); 
+    if(typeof renderHome==='function') renderHome();
+  }catch(e){ 
+    showToast('백업 실패 — 설정에서 드라이브 다시 연결해주세요.', 0); 
+  } 
+}
 
 /* ═══════════════════════════════════
    APP INIT & PC/MOBILE UX

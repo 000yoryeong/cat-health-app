@@ -427,12 +427,18 @@ function loadForEdit(idx) {
   showToast('데이터를 불러왔습니다.', catIdx);
 }
 
-async function saveRecord() {
-  const btn = document.getElementById('rec-save-btn'); btn.disabled = true; btn.textContent = '저장 중…';
-  try {
-    const newPhotoIds = []; 
-    for (const p of pendingPhotos) { const fid = await gdriveUploadPhoto(p.dataUrl, p.filename); if (fid) newPhotoIds.push(fid); }
-    const finalPhotoIds = [...editExistingPhotoIds, ...newPhotoIds];
+const newPhotoIds = []; 
+try {
+  for (const p of pendingPhotos) { 
+    const fid = await gdriveUploadPhoto(p.dataUrl, p.filename); 
+    newPhotoIds.push(fid); 
+  }
+} catch(err) {
+  showToast('드라이브 연결이 만료됐어요. 설정에서 다시 연결한 뒤 저장해주세요.', 0);
+  btn.disabled = false; btn.textContent = '저장';
+  return;
+}
+}    const finalPhotoIds = [...editExistingPhotoIds, ...newPhotoIds];
     const custom = {}; cfields.forEach(cf => { const v = document.getElementById('cf-val-' + cf.id)?.value; if (v !== '' && v != null) custom[cf.id] = parseFloat(v); });
     const newRecord = { cat: cats[recCat].id, date: document.getElementById('rec-date').value || new Date().toISOString().split('T')[0], weight: parseFloat(document.getElementById('rec-weight').value) || null, meal: getSel('meal') || '—', poop: getSel('poop') || '—', cond: getSel('cond') || '—', water: getSel('water') || '—', custom, photoIds: finalPhotoIds, memo: document.getElementById('rec-memo').value.trim() };
     const existingIdx = records.findIndex(r => r.cat === newRecord.cat && r.date === newRecord.date);
@@ -679,8 +685,9 @@ let tokenClient=null, accessToken=null, driveFileId=LS.get('driveFileId')||null;
 
 function initGDrive(){
   if(!window.google?.accounts) return;
-  tokenClient=google.accounts.oauth2.initTokenClient({ client_id:CLIENT_ID, scope:'https://www.googleapis.com/auth/drive.file', callback:async resp=>{ if(resp.error){gdriveSetState('error');return;} accessToken=resp.access_token; sessionStorage.setItem('gd_token',accessToken); gdriveSetState('syncing'); await gdriveSyncFull(); } });
-  const saved=sessionStorage.getItem('gd_token'); if(saved){accessToken=saved;gdriveSetState('connected');}
+  tokenClient=google.accounts.oauth2.initTokenClient({ client_id:CLIENT_ID, scope:'https://www.googleapis.com/auth/drive.file', callback:async resp=>{ if(resp.error){gdriveSetState('error');return;} accessToken=resp.access_token; localStorage.setItem('gd_token',accessToken); gdriveSetState('syncing'); await gdriveSyncFull(); } });
+  const saved=localStorage.getItem('gd_token'); 
+if(saved){accessToken=saved;gdriveSetState('connected');}
 }
 function gdriveSetState(s){
   const btn=document.getElementById('gdrive-btn'); const st=document.getElementById('gdrive-status'); if(!btn) return;
@@ -705,7 +712,7 @@ async function gdriveUploadJSON(){
   else { const form=new FormData(); form.append('metadata',new Blob([JSON.stringify({name:'냥이건강수첩_backup.json'})],{type:'application/json'})); form.append('file',blob); const res=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {method:'POST',headers:{Authorization:'Bearer '+accessToken},body:form}); const d=await res.json(); driveFileId=d.id; LS.set('driveFileId', driveFileId); }
 }
 async function gdriveUploadPhoto(dataUrl, filename){
-  if(!accessToken) return null;
+  if(!accessToken) throw new Error('NO_TOKEN');
   try{
     let folderId = await gdriveFindFile('냥이건강_사진');
     if(!folderId) {
@@ -713,8 +720,11 @@ async function gdriveUploadPhoto(dataUrl, filename){
     }
     const res=await fetch(dataUrl); const blob=await res.blob(); const form=new FormData();
     form.append('metadata',new Blob([JSON.stringify({name:filename,parents:[folderId]})],{type:'application/json'})); form.append('file',new File([blob],filename,{type:'image/jpeg'}));
-    const r=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {method:'POST',headers:{Authorization:'Bearer '+accessToken},body:form}); return (await r.json()).id||null;
-  }catch(e){return null;}
+    const r=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {method:'POST',headers:{Authorization:'Bearer '+accessToken},body:form}); 
+    const result = await r.json();
+    if(!result.id) throw new Error('UPLOAD_FAIL');
+    return result.id;
+  }catch(e){ throw e; }
 }
 async function gdriveFindFile(name) { 
   const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=name='${name}' and trashed=false&fields=files(id)`, {headers:{Authorization:'Bearer '+accessToken}}); 
